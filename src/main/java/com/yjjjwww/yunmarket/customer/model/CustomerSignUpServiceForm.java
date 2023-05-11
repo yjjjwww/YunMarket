@@ -9,19 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CustomerSignUpForm {
+public class CustomerSignUpServiceForm {
 
   private String email;
   private String password;
   private String phone;
   private String address;
-
-  public CustomerSignUpServiceForm toServiceForm() {
-    return CustomerSignUpServiceForm.builder()
-        .email(email)
-        .password(password)
-        .phone(phone)
-        .address(address)
-        .build();
-  }
 }

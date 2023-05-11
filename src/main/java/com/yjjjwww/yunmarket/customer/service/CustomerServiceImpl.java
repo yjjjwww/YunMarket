@@ -1,10 +1,10 @@
 package com.yjjjwww.yunmarket.customer.service;
 
 import com.yjjjwww.yunmarket.customer.entity.Customer;
+import com.yjjjwww.yunmarket.customer.model.CustomerSignUpServiceForm;
+import com.yjjjwww.yunmarket.customer.repository.CustomerRepository;
 import com.yjjjwww.yunmarket.exception.CustomException;
 import com.yjjjwww.yunmarket.exception.ErrorCode;
-import com.yjjjwww.yunmarket.customer.model.CustomerSignUpForm;
-import com.yjjjwww.yunmarket.customer.repository.CustomerRepository;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,38 +18,38 @@ public class CustomerServiceImpl implements CustomerService {
 
   private final CustomerRepository customerRepository;
 
-  private static final String SIGNUP_SUCCESS = "회원가입 성공";
+  private static final String PHONE_REGEX = "^[0-9]*$";
+  private static final String PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{8,}$";
 
   @Override
-  public String signUp(CustomerSignUpForm customerSignUpForm) {
+  public void signUp(CustomerSignUpServiceForm customerSignUpServiceForm) {
     Optional<Customer> optionalCustomer =
-        customerRepository.findByEmail(customerSignUpForm.getEmail());
-    if (optionalCustomer.isPresent()) {
-      throw (new CustomException(ErrorCode.ALREADY_SIGNUP_EMAIL));
-    }
+        customerRepository.findByEmail(customerSignUpServiceForm.getEmail());
 
-    if (!isValidPassword(customerSignUpForm.getPassword())) {
+    optionalCustomer.ifPresent(it -> {
+      throw new CustomException(ErrorCode.ALREADY_SIGNUP_EMAIL);
+    });
+
+    if (!isValidPassword(customerSignUpServiceForm.getPassword())) {
       throw new CustomException(ErrorCode.INVALID_PASSWORD);
     }
 
-    if (!isValidPhone(customerSignUpForm.getPhone())) {
+    if (!isValidPhone(customerSignUpServiceForm.getPhone())) {
       throw new CustomException(ErrorCode.INVALID_PHONE);
     }
 
-    String encPassword = BCrypt.hashpw(customerSignUpForm.getPassword(), BCrypt.gensalt());
+    String encPassword = BCrypt.hashpw(customerSignUpServiceForm.getPassword(), BCrypt.gensalt());
 
     Customer customer = Customer.builder()
-        .email(customerSignUpForm.getEmail())
+        .email(customerSignUpServiceForm.getEmail())
         .password(encPassword)
-        .phone(customerSignUpForm.getPhone())
-        .address(customerSignUpForm.getAddress())
+        .phone(customerSignUpServiceForm.getPhone())
+        .address(customerSignUpServiceForm.getAddress())
         .point(0)
         .deletedYn(false)
         .build();
 
     customerRepository.save(customer);
-
-    return SIGNUP_SUCCESS;
   }
 
   /**
@@ -59,27 +59,17 @@ public class CustomerServiceImpl implements CustomerService {
     if (phone.length() > 11 || phone.length() < 5) {
       return false;
     }
-    boolean err = false;
-    String regex = "^[0-9]*$";
-    Pattern p = Pattern.compile(regex);
+    Pattern p = Pattern.compile(PHONE_REGEX);
     Matcher m = p.matcher(phone);
-    if (m.matches()) {
-      err = true;
-    }
-    return err;
+    return m.matches();
   }
 
   /**
    * 비밀번호 형식 검사(최소 8자리에 숫자, 문자, 특수문자 각각 1개 이상 포함)
    */
   private static boolean isValidPassword(String password) {
-    boolean err = false;
-    String regex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{8,}$";
-    Pattern p = Pattern.compile(regex);
+    Pattern p = Pattern.compile(PASSWORD_REGEX);
     Matcher m = p.matcher(password);
-    if (m.matches()) {
-      err = true;
-    }
-    return err;
+    return m.matches();
   }
 }

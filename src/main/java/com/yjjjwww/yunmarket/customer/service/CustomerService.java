@@ -1,11 +1,11 @@
 package com.yjjjwww.yunmarket.customer.service;
 
-import com.yjjjwww.yunmarket.customer.model.CustomerSignUpForm;
+import com.yjjjwww.yunmarket.customer.model.CustomerSignUpServiceForm;
 
 public interface CustomerService {
 
   /**
    * Customer 회원가입
    */
-  String signUp(CustomerSignUpForm customerSignUpForm);
+  void signUp(CustomerSignUpServiceForm customerSignUpServiceForm);
 }

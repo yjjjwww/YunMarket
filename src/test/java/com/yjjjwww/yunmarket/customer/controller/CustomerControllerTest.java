@@ -1,7 +1,7 @@
 package com.yjjjwww.yunmarket.customer.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -44,7 +44,6 @@ class CustomerControllerTest {
         .address("대한민국 경기도 안양시")
         .build();
 
-    given(customerService.signUp(form)).willReturn("회원가입 성공");
     //when
     //then
     mockMvc.perform(post("/customer/signUp")
@@ -64,8 +63,9 @@ class CustomerControllerTest {
         .address("대한민국 경기도 안양시")
         .build();
 
-    given(customerService.signUp(form)).willThrow(
-        new CustomException(ErrorCode.ALREADY_SIGNUP_EMAIL));
+    doThrow(new CustomException(ErrorCode.ALREADY_SIGNUP_EMAIL))
+        .when(customerService)
+        .signUp(form.toServiceForm());
     //when
     //then
     ResultActions result = mockMvc.perform(post("/customer/signUp")
@@ -90,8 +90,9 @@ class CustomerControllerTest {
         .address("대한민국 경기도 안양시")
         .build();
 
-    given(customerService.signUp(form)).willThrow(
-        new CustomException(ErrorCode.INVALID_PASSWORD));
+    doThrow(new CustomException(ErrorCode.INVALID_PASSWORD))
+        .when(customerService)
+        .signUp(form.toServiceForm());
     //when
     //then
     ResultActions result = mockMvc.perform(post("/customer/signUp")
@@ -116,8 +117,9 @@ class CustomerControllerTest {
         .address("대한민국 경기도 안양시")
         .build();
 
-    given(customerService.signUp(form)).willThrow(
-        new CustomException(ErrorCode.INVALID_PHONE));
+    doThrow(new CustomException(ErrorCode.INVALID_PHONE))
+        .when(customerService)
+        .signUp(form.toServiceForm());
     //when
     //then
     ResultActions result = mockMvc.perform(post("/customer/signUp")

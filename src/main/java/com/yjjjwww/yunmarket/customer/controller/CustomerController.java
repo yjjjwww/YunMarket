@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class CustomerController {
 
   private final CustomerService customerService;
+  private static final String SIGNUP_SUCCESS = "회원가입 성공";
 
   @PostMapping("/signUp")
   public ResponseEntity<String> signUp(@RequestBody CustomerSignUpForm customerSignUpForm) {
-    return ResponseEntity.ok(customerService.signUp(customerSignUpForm));
+    customerService.signUp(customerSignUpForm.toServiceForm());
+    return ResponseEntity.ok(SIGNUP_SUCCESS);
   }
 }

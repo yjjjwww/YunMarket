@@ -2,8 +2,11 @@ package com.yjjjwww.yunmarket.customer.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.yjjjwww.yunmarket.customer.entity.Customer;
 import com.yjjjwww.yunmarket.customer.model.CustomerSignUpForm;
@@ -19,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class CustomerServiceImplTest {
+
   @Mock
   private CustomerRepository customerRepository;
 
@@ -36,10 +40,10 @@ class CustomerServiceImplTest {
         .build();
 
     //when
-    String result = customerService.signUp(form);
+    customerService.signUp(form.toServiceForm());
 
     //then
-    assertEquals("회원가입 성공", result);
+    verify(customerRepository, times(1)).save(any(Customer.class));
   }
 
   @Test
@@ -57,7 +61,7 @@ class CustomerServiceImplTest {
 
     //when
     CustomException exception = assertThrows(CustomException.class,
-        () -> customerService.signUp(form));
+        () -> customerService.signUp(form.toServiceForm()));
 
     //then
     assertEquals(ErrorCode.ALREADY_SIGNUP_EMAIL, exception.getErrorCode());
@@ -75,7 +79,7 @@ class CustomerServiceImplTest {
 
     //when
     CustomException exception = assertThrows(CustomException.class,
-        () -> customerService.signUp(form));
+        () -> customerService.signUp(form.toServiceForm()));
 
     //then
     assertEquals(ErrorCode.INVALID_PASSWORD, exception.getErrorCode());
@@ -93,7 +97,7 @@ class CustomerServiceImplTest {
 
     //when
     CustomException exception = assertThrows(CustomException.class,
-        () -> customerService.signUp(form));
+        () -> customerService.signUp(form.toServiceForm()));
 
     //then
     assertEquals(ErrorCode.INVALID_PHONE, exception.getErrorCode());

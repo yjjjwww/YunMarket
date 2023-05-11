@@ -22,7 +22,7 @@ public class Customer extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  Long id;
+  private Long id;
 
   @Column(unique = true)
   String email;
