@@ -1,5 +1,6 @@
 package com.yjjjwww.yunmarket.customer.controller;
 
+import com.yjjjwww.yunmarket.customer.model.CustomerSignInForm;
 import com.yjjjwww.yunmarket.customer.model.CustomerSignUpForm;
 import com.yjjjwww.yunmarket.customer.service.CustomerService;
 import lombok.RequiredArgsConstructor;
@@ -21,5 +22,10 @@ public class CustomerController {
   public ResponseEntity<String> signUp(@RequestBody CustomerSignUpForm customerSignUpForm) {
     customerService.signUp(customerSignUpForm.toServiceForm());
     return ResponseEntity.ok(SIGNUP_SUCCESS);
+  }
+
+  @PostMapping("/signIn")
+  public ResponseEntity<String> signIn(@RequestBody CustomerSignInForm customerSignInForm) {
+    return ResponseEntity.ok(customerService.signIn(customerSignInForm.toServiceForm()));
   }
 }
