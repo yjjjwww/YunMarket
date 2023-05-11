@@ -1,8 +1,10 @@
 package com.yjjjwww.yunmarket.customer.model;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class CustomerSignUpForm {
 
   private String email;
