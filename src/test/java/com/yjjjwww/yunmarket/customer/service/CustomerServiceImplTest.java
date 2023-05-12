@@ -1,14 +1,18 @@
 package com.yjjjwww.yunmarket.customer.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.yjjjwww.yunmarket.config.JwtTokenProvider;
 import com.yjjjwww.yunmarket.customer.entity.Customer;
+import com.yjjjwww.yunmarket.customer.model.CustomerSignInServiceForm;
 import com.yjjjwww.yunmarket.customer.model.CustomerSignUpForm;
 import com.yjjjwww.yunmarket.customer.repository.CustomerRepository;
 import com.yjjjwww.yunmarket.exception.CustomException;
@@ -19,12 +23,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 @ExtendWith(MockitoExtension.class)
 class CustomerServiceImplTest {
 
   @Mock
   private CustomerRepository customerRepository;
+
+  @Mock
+  private JwtTokenProvider provider;
 
   @InjectMocks
   private CustomerServiceImpl customerService;
@@ -101,5 +109,73 @@ class CustomerServiceImplTest {
 
     //then
     assertEquals(ErrorCode.INVALID_PHONE, exception.getErrorCode());
+  }
+
+  @Test
+  void customerSignInSuccess() {
+    //given
+    CustomerSignInServiceForm form = CustomerSignInServiceForm.builder()
+        .email("yjjjwww@naver.com")
+        .password("zero1111")
+        .build();
+
+    Customer customer = Customer.builder()
+        .id(1L)
+        .email("yjjjwww@naver.com")
+        .password(BCrypt.hashpw("zero1111", BCrypt.gensalt()))
+        .build();
+
+    given(customerRepository.findByEmail(anyString())).willReturn(Optional.ofNullable(customer));
+    given(provider.createToken(anyString(), anyLong(), any())).willReturn("JWT Token");
+
+    //when
+    String token = customerService.signIn(form);
+
+    //then
+    assertNotNull(token);
+  }
+
+  @Test
+  void customerSignInFail_LOGIN_CHECK_FAIL_No_Email() {
+    //given
+    CustomerSignInServiceForm form = CustomerSignInServiceForm.builder()
+        .email("yjjjwww@naver.com")
+        .password("zero1111")
+        .build();
+
+    given(customerRepository.findByEmail(anyString())).willReturn(
+        Optional.ofNullable(Customer.builder().build()));
+
+    //when
+    CustomException exception = assertThrows(CustomException.class,
+        () -> customerService.signIn(form));
+
+    //then
+    assertEquals(ErrorCode.LOGIN_CHECK_FAIL, exception.getErrorCode());
+  }
+
+  @Test
+  void customerSignInFail_LOGIN_CHECK_Invalid_Password() {
+    //given
+    CustomerSignInServiceForm form = CustomerSignInServiceForm.builder()
+        .email("yjjjwww@naver.com")
+        .password("zero1111")
+        .build();
+
+    Customer customer = Customer.builder()
+        .id(1L)
+        .email("yjjjwww@naver.com")
+        .password("Wrong Password")
+        .build();
+
+    given(customerRepository.findByEmail(anyString())).willReturn(
+        Optional.ofNullable(customer));
+
+    //when
+    CustomException exception = assertThrows(CustomException.class,
+        () -> customerService.signIn(form));
+
+    //then
+    assertEquals(ErrorCode.LOGIN_CHECK_FAIL, exception.getErrorCode());
   }
 }

@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yjjjwww.yunmarket.customer.model.CustomerSignInForm;
 import com.yjjjwww.yunmarket.customer.model.CustomerSignUpForm;
 import com.yjjjwww.yunmarket.customer.service.CustomerService;
 import com.yjjjwww.yunmarket.exception.CustomException;
@@ -132,5 +133,47 @@ class CustomerControllerTest {
     String code = responseJson.get("code").asText();
 
     assertEquals("INVALID_PHONE", code);
+  }
+
+  @Test
+  void customerSignInSuccess() throws Exception {
+    //given
+    CustomerSignInForm form = CustomerSignInForm.builder()
+        .email("yjjjwww123@naver.com")
+        .password("zero1234@")
+        .build();
+
+    //when
+    //then
+    mockMvc.perform(post("/customer/signIn")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(form)))
+        .andExpect(status().isOk())
+        .andDo(print());
+  }
+
+  @Test
+  void customerSignInFail_LOGIN_CHECK_FAIL() throws Exception {
+    //given
+    CustomerSignInForm form = CustomerSignInForm.builder()
+        .email("yjjjwww123@naver.com")
+        .password("zero1234@")
+        .build();
+
+    doThrow(new CustomException(ErrorCode.LOGIN_CHECK_FAIL))
+        .when(customerService)
+        .signIn(form.toServiceForm());
+    //when
+    //then
+    ResultActions result = mockMvc.perform(post("/customer/signIn")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(form)));
+    result.andExpect(status().isBadRequest())
+        .andDo(print());
+    String responseBody = result.andReturn().getResponse().getContentAsString();
+    JsonNode responseJson = objectMapper.readTree(responseBody);
+    String code = responseJson.get("code").asText();
+
+    assertEquals("LOGIN_CHECK_FAIL", code);
   }
 }
