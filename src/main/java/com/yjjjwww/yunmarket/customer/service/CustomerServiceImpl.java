@@ -1,6 +1,9 @@
 package com.yjjjwww.yunmarket.customer.service;
 
+import com.yjjjwww.yunmarket.common.UserType;
+import com.yjjjwww.yunmarket.config.JwtTokenProvider;
 import com.yjjjwww.yunmarket.customer.entity.Customer;
+import com.yjjjwww.yunmarket.customer.model.CustomerSignInServiceForm;
 import com.yjjjwww.yunmarket.customer.model.CustomerSignUpServiceForm;
 import com.yjjjwww.yunmarket.customer.repository.CustomerRepository;
 import com.yjjjwww.yunmarket.exception.CustomException;
@@ -10,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -17,6 +21,7 @@ import org.springframework.stereotype.Service;
 public class CustomerServiceImpl implements CustomerService {
 
   private final CustomerRepository customerRepository;
+  private final JwtTokenProvider provider;
 
   private static final String PHONE_REGEX = "^[0-9]*$";
   private static final String PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{8,}$";
@@ -50,6 +55,23 @@ public class CustomerServiceImpl implements CustomerService {
         .build();
 
     customerRepository.save(customer);
+  }
+
+  @Override
+  public String signIn(CustomerSignInServiceForm form) {
+    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+    Optional<Customer> optionalCustomer =
+        customerRepository.findByEmail(form.getEmail());
+
+    if (optionalCustomer.isEmpty() || !encoder.matches(form.getPassword(),
+        optionalCustomer.get().getPassword())) {
+      throw new CustomException(ErrorCode.LOGIN_CHECK_FAIL);
+    }
+
+    Customer customer = optionalCustomer.get();
+
+    return provider.createToken(customer.getEmail(), customer.getId(), UserType.CUSTOMER);
   }
 
   /**
