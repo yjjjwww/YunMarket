@@ -10,12 +10,15 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+  private final JwtTokenProvider provider;
 
   @Bean
   public PasswordEncoder getPasswordEncoder() {
@@ -29,7 +32,10 @@ public class SecurityConfig {
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
         .authorizeRequests()
-        .antMatchers("/**/signUp", "/**/signIn").permitAll();
+        .antMatchers("/**/signUp", "/**/signIn").permitAll()
+        .and()
+        .addFilterBefore(new JwtTokenFilter(provider),
+            UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }
