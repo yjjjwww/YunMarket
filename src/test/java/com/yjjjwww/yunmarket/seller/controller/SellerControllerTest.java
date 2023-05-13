@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yjjjwww.yunmarket.exception.CustomException;
 import com.yjjjwww.yunmarket.exception.ErrorCode;
+import com.yjjjwww.yunmarket.seller.model.SellerSignInForm;
 import com.yjjjwww.yunmarket.seller.model.SellerSignUpForm;
 import com.yjjjwww.yunmarket.seller.service.SellerService;
 import org.junit.jupiter.api.Test;
@@ -128,5 +129,47 @@ class SellerControllerTest {
     String code = responseJson.get("code").asText();
 
     assertEquals("INVALID_PHONE", code);
+  }
+
+  @Test
+  void sellerSignInSuccess() throws Exception {
+    //given
+    SellerSignInForm form = SellerSignInForm.builder()
+        .email("yjjjwww@naver.com")
+        .password("zero1234@")
+        .build();
+
+    //when
+    //then
+    mockMvc.perform(post("/seller/signIn")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(form)))
+        .andExpect(status().isOk())
+        .andDo(print());
+  }
+
+  @Test
+  void sellerSignInFail_LOGIN_CHECK_FAIL() throws Exception {
+    //given
+    SellerSignInForm form = SellerSignInForm.builder()
+        .email("yjjjwww@naver.com")
+        .password("zero1234@")
+        .build();
+
+    doThrow(new CustomException(ErrorCode.LOGIN_CHECK_FAIL))
+        .when(sellerService)
+        .signIn(form.toServiceForm());
+    //when
+    //then
+    ResultActions result = mockMvc.perform(post("/seller/signIn")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(form)));
+    result.andExpect(status().isBadRequest())
+        .andDo(print());
+    String responseBody = result.andReturn().getResponse().getContentAsString();
+    JsonNode responseJson = objectMapper.readTree(responseBody);
+    String code = responseJson.get("code").asText();
+
+    assertEquals("LOGIN_CHECK_FAIL", code);
   }
 }
