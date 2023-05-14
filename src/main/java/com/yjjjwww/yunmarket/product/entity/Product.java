@@ -1,16 +1,13 @@
-package com.yjjjwww.yunmarket.seller.entity;
+package com.yjjjwww.yunmarket.product.entity;
 
 import com.yjjjwww.yunmarket.entity.BaseEntity;
-import com.yjjjwww.yunmarket.product.entity.Product;
-import java.util.ArrayList;
-import java.util.List;
-import javax.persistence.Column;
+import com.yjjjwww.yunmarket.seller.entity.Seller;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,20 +21,27 @@ import lombok.ToString;
 @Builder
 @Data
 @Entity
-public class Seller extends BaseEntity {
+public class Product extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(unique = true)
-  String email;
-
-  String password;
-  String phone;
-  boolean deletedYn;
-
-  @OneToMany(mappedBy = "seller", fetch = FetchType.EAGER)
+  @ManyToOne
+  @JoinColumn(name = "category_id")
   @ToString.Exclude
-  private List<Product> productList = new ArrayList<>();
+  private Category category;
+
+  @ManyToOne
+  @JoinColumn(name = "seller_id")
+  @ToString.Exclude
+  private Seller seller;
+
+  String name;
+  Integer price;
+  String description;
+  Integer quantity;
+  String image;
+  Integer orderedCnt;
+  boolean deletedYn;
 }

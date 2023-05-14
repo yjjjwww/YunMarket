@@ -1,7 +1,5 @@
-package com.yjjjwww.yunmarket.seller.entity;
+package com.yjjjwww.yunmarket.product.entity;
 
-import com.yjjjwww.yunmarket.entity.BaseEntity;
-import com.yjjjwww.yunmarket.product.entity.Product;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Column;
@@ -14,30 +12,24 @@ import javax.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Data
 @Entity
-public class Seller extends BaseEntity {
+public class Category {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @Column(unique = true)
-  String email;
+  String name;
 
-  String password;
-  String phone;
-  boolean deletedYn;
-
-  @OneToMany(mappedBy = "seller", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "category", fetch = FetchType.EAGER)
   @ToString.Exclude
   private List<Product> productList = new ArrayList<>();
 }
