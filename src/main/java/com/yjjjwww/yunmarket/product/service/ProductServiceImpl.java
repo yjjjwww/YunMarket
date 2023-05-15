@@ -6,12 +6,17 @@ import com.yjjjwww.yunmarket.exception.CustomException;
 import com.yjjjwww.yunmarket.exception.ErrorCode;
 import com.yjjjwww.yunmarket.product.entity.Category;
 import com.yjjjwww.yunmarket.product.entity.Product;
+import com.yjjjwww.yunmarket.product.model.ProductInfo;
 import com.yjjjwww.yunmarket.product.model.ProductRegisterServiceForm;
 import com.yjjjwww.yunmarket.product.repository.CategoryRepository;
 import com.yjjjwww.yunmarket.product.repository.ProductRepository;
 import com.yjjjwww.yunmarket.seller.entity.Seller;
 import com.yjjjwww.yunmarket.seller.repository.SellerRepository;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -51,6 +56,28 @@ public class ProductServiceImpl implements ProductService {
         .build();
 
     productRepository.save(product);
+  }
+
+  @Override
+  public List<ProductInfo> getLatestProducts(Integer page, Integer size) {
+    Pageable pageable = PageRequest.of(page - 1, size);
+    List<Product> products = productRepository.findAllByOrderByCreatedDateDesc(pageable);
+
+    List<ProductInfo> result = new ArrayList<>();
+
+    for (Product product : products) {
+      ProductInfo productInfo = ProductInfo.builder()
+          .name(product.getName())
+          .price(product.getPrice())
+          .description(product.getDescription())
+          .quantity(product.getQuantity())
+          .image(product.getImage())
+          .categoryName(product.getCategory().getName())
+          .build();
+      result.add(productInfo);
+    }
+
+    return result;
   }
 
   private static boolean isStringEmpty(String str) {
