@@ -220,4 +220,28 @@ class ProductControllerTest {
 
     assertEquals(3, actualProductInfos.size());
   }
+
+  @Test
+  void getLowestPriceProductsSuccess() throws Exception {
+    // given
+    List<ProductInfo> productInfos = new ArrayList<>();
+    for (int i = 0; i < 3; i++) {
+      productInfos.add(ProductInfo.builder().build());
+    }
+
+    // when
+    given(productService.getLowestPriceProducts(anyInt(), anyInt())).willReturn(productInfos);
+
+    // then
+    MvcResult result = mockMvc.perform(get("/product/search/lowestPrice?page=1&size=3"))
+        .andExpect(status().isOk())
+        .andReturn();
+
+    String response = result.getResponse().getContentAsString();
+    List<ProductInfo> actualProductInfos = new ObjectMapper().readValue(response,
+        new TypeReference<>() {
+        });
+
+    assertEquals(3, actualProductInfos.size());
+  }
 }

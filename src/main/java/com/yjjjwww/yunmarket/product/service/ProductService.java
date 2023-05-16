@@ -15,4 +15,9 @@ public interface ProductService {
    * 상품 최신순 조회
    */
   List<ProductInfo> getLatestProducts(Integer page, Integer size);
+
+  /**
+   * 상품 낮은 가격순 조회
+   */
+  List<ProductInfo> getLowestPriceProducts(Integer page, Integer size);
 }
