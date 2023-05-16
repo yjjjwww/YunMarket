@@ -10,4 +10,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
   @Query("SELECT p FROM Product p JOIN FETCH p.category ORDER BY p.createdDate DESC")
   List<Product> findAllByOrderByCreatedDateDesc(Pageable pageable);
+
+  @Query("SELECT p FROM Product p JOIN FETCH p.category ORDER BY p.price ASC, p.createdDate DESC")
+  List<Product> findAllByOrderByPriceAscAndCreatedDateDesc(Pageable pageable);
 }

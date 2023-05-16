@@ -41,4 +41,12 @@ public class ProductController {
   ) {
     return ResponseEntity.ok(productService.getLatestProducts(page, size));
   }
+
+  @GetMapping("/search/lowestPrice")
+  public ResponseEntity<List<ProductInfo>> getLowestPriceProducts(
+      @RequestParam("page") Integer page,
+      @RequestParam("size") Integer size
+  ) {
+    return ResponseEntity.ok(productService.getLowestPriceProducts(page, size));
+  }
 }

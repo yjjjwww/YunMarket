@@ -80,6 +80,28 @@ public class ProductServiceImpl implements ProductService {
     return result;
   }
 
+  @Override
+  public List<ProductInfo> getLowestPriceProducts(Integer page, Integer size) {
+    Pageable pageable = PageRequest.of(page - 1, size);
+    List<Product> products = productRepository.findAllByOrderByPriceAscAndCreatedDateDesc(pageable);
+
+    List<ProductInfo> result = new ArrayList<>();
+
+    for (Product product : products) {
+      ProductInfo productInfo = ProductInfo.builder()
+          .name(product.getName())
+          .price(product.getPrice())
+          .description(product.getDescription())
+          .quantity(product.getQuantity())
+          .image(product.getImage())
+          .categoryName(product.getCategory().getName())
+          .build();
+      result.add(productInfo);
+    }
+
+    return result;
+  }
+
   private static boolean isStringEmpty(String str) {
     return str == null || str.isBlank();
   }
