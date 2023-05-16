@@ -2,20 +2,27 @@ package com.yjjjwww.yunmarket.product.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yjjjwww.yunmarket.common.UserType;
 import com.yjjjwww.yunmarket.config.JwtTokenProvider;
 import com.yjjjwww.yunmarket.exception.CustomException;
 import com.yjjjwww.yunmarket.exception.ErrorCode;
+import com.yjjjwww.yunmarket.product.model.ProductInfo;
 import com.yjjjwww.yunmarket.product.model.ProductRegisterForm;
 import com.yjjjwww.yunmarket.product.service.ProductService;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,6 +31,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
 @SpringBootTest
@@ -187,5 +195,29 @@ class ProductControllerTest {
     String code = responseJson.get("code").asText();
 
     assertEquals("CATEGORY_NOT_FOUND", code);
+  }
+
+  @Test
+  void getLatestProductsSuccess() throws Exception {
+    // given
+    List<ProductInfo> productInfos = new ArrayList<>();
+    for (int i = 0; i < 3; i++) {
+      productInfos.add(ProductInfo.builder().build());
+    }
+
+    // when
+    given(productService.getLatestProducts(anyInt(), anyInt())).willReturn(productInfos);
+
+    // then
+    MvcResult result = mockMvc.perform(get("/product/search/latest?page=1&size=3"))
+        .andExpect(status().isOk())
+        .andReturn();
+
+    String response = result.getResponse().getContentAsString();
+    List<ProductInfo> actualProductInfos = new ObjectMapper().readValue(response,
+        new TypeReference<>() {
+        });
+
+    assertEquals(3, actualProductInfos.size());
   }
 }
