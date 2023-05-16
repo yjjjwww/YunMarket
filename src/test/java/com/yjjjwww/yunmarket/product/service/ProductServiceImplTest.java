@@ -162,7 +162,7 @@ class ProductServiceImplTest {
           .build());
     }
 
-    given(productRepository.findAllByOrderByCreatedDateDesc(any())).willReturn(productList);
+    given(productRepository.findAllBy(any())).willReturn(productList);
 
     //when
     List<ProductInfo> result = productService.getLatestProducts(1, 3);
@@ -190,7 +190,7 @@ class ProductServiceImplTest {
           .build());
     }
 
-    given(productRepository.findAllByOrderByPriceAscAndCreatedDateDesc(any())).willReturn(
+    given(productRepository.findAllBy(any())).willReturn(
         productList);
 
     //when
