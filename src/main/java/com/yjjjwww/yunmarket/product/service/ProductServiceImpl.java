@@ -12,11 +12,11 @@ import com.yjjjwww.yunmarket.product.repository.CategoryRepository;
 import com.yjjjwww.yunmarket.product.repository.ProductRepository;
 import com.yjjjwww.yunmarket.seller.entity.Seller;
 import com.yjjjwww.yunmarket.seller.repository.SellerRepository;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -60,24 +60,11 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   public List<ProductInfo> getLatestProducts(Integer page, Integer size) {
-    Pageable pageable = PageRequest.of(page - 1, size);
-    List<Product> products = productRepository.findAllByOrderByCreatedDateDesc(pageable);
+    Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdDate").descending());
 
-    List<ProductInfo> result = new ArrayList<>();
+    List<Product> products = productRepository.findAllBy(pageable);
 
-    for (Product product : products) {
-      ProductInfo productInfo = ProductInfo.builder()
-          .name(product.getName())
-          .price(product.getPrice())
-          .description(product.getDescription())
-          .quantity(product.getQuantity())
-          .image(product.getImage())
-          .categoryName(product.getCategory().getName())
-          .build();
-      result.add(productInfo);
-    }
-
-    return result;
+    return ProductInfo.toList(products);
   }
 
   private static boolean isStringEmpty(String str) {
