@@ -202,4 +202,34 @@ class ProductServiceImplTest {
     assertEquals(2, result.get(1).getPrice());
     assertEquals("카테고리1", result.get(1).getCategoryName());
   }
+
+  @Test
+  void getMostOrderedProductsSuccess() {
+    //given
+    List<Product> productList = new ArrayList<>();
+    for (int i = 0; i < 3; i++) {
+      productList.add(Product.builder()
+          .name("상품" + i)
+          .price(i + 1)
+          .description("상품" + "i" + "설명")
+          .quantity(100 + i)
+          .image("상품" + "i" + "이미지")
+          .category(Category.builder()
+              .name("카테고리" + i)
+              .build())
+          .build());
+    }
+
+    given(productRepository.findAllBy(any())).willReturn(
+        productList);
+
+    //when
+    List<ProductInfo> result = productService.getMostOrderedProducts(1, 3);
+
+    //then
+    assertEquals(3, result.size());
+    assertEquals("상품1", result.get(1).getName());
+    assertEquals(2, result.get(1).getPrice());
+    assertEquals("카테고리1", result.get(1).getCategoryName());
+  }
 }

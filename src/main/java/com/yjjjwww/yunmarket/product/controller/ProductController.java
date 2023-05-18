@@ -49,4 +49,12 @@ public class ProductController {
   ) {
     return ResponseEntity.ok(productService.getLowestPriceProducts(page, size));
   }
+
+  @GetMapping("/search/ordered")
+  public ResponseEntity<List<ProductInfo>> getMostOrderedProducts(
+      @RequestParam("page") Integer page,
+      @RequestParam("size") Integer size
+  ) {
+    return ResponseEntity.ok(productService.getMostOrderedProducts(page, size));
+  }
 }

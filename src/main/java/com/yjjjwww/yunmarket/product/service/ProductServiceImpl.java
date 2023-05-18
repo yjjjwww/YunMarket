@@ -76,6 +76,15 @@ public class ProductServiceImpl implements ProductService {
     return ProductInfo.toList(products);
   }
 
+  @Override
+  public List<ProductInfo> getMostOrderedProducts(Integer page, Integer size) {
+    Pageable pageable = PageRequest.of(page - 1, size,
+        Sort.by("orderedCnt").descending().and(Sort.by("createdDate").descending()));
+    List<Product> products = productRepository.findAllBy(pageable);
+
+    return ProductInfo.toList(products);
+  }
+
   private static boolean isStringEmpty(String str) {
     return str == null || str.isBlank();
   }
