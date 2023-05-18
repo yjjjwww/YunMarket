@@ -25,4 +25,9 @@ public interface ProductService {
    * 상품 낮은 가격순 조회
    */
   List<ProductInfo> getMostOrderedProducts(Integer page, Integer size);
+
+  /**
+   * 상품 검색
+   */
+  List<ProductInfo> searchProducts(String name, Integer page, Integer size);
 }
