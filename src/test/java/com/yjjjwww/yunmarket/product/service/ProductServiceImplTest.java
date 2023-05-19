@@ -31,6 +31,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceImplTest {
@@ -153,6 +158,8 @@ class ProductServiceImplTest {
   @Test
   void getLatestProductsSuccess() {
     //given
+    Pageable pageable = PageRequest.of(1, 3, Sort.by("createdDate").descending());
+
     List<Product> productList = new ArrayList<>();
     for (int i = 0; i < 3; i++) {
       productList.add(Product.builder()
@@ -167,10 +174,12 @@ class ProductServiceImplTest {
           .build());
     }
 
-    given(productRepository.findAllBy(any())).willReturn(productList);
+    Page<Product> productPage = new PageImpl<>(productList);
+
+    given(productRepository.findAll(pageable)).willReturn(productPage);
 
     //when
-    List<ProductInfo> result = productService.getLatestProducts(1, 3);
+    List<ProductInfo> result = productService.getProducts(pageable);
 
     //then
     assertEquals(3, result.size());
@@ -181,6 +190,8 @@ class ProductServiceImplTest {
   @Test
   void getLowestPriceProductsSuccess() {
     //given
+    Pageable pageable = PageRequest.of(1, 3, Sort.by("price").ascending());
+
     List<Product> productList = new ArrayList<>();
     for (int i = 0; i < 3; i++) {
       productList.add(Product.builder()
@@ -195,22 +206,24 @@ class ProductServiceImplTest {
           .build());
     }
 
-    given(productRepository.findAllBy(any())).willReturn(
-        productList);
+    Page<Product> productPage = new PageImpl<>(productList);
+
+    given(productRepository.findAll(pageable)).willReturn(productPage);
 
     //when
-    List<ProductInfo> result = productService.getLowestPriceProducts(1, 3);
+    List<ProductInfo> result = productService.getProducts(pageable);
 
     //then
     assertEquals(3, result.size());
     assertEquals("상품1", result.get(1).getName());
-    assertEquals(2, result.get(1).getPrice());
     assertEquals("카테고리1", result.get(1).getCategoryName());
   }
 
   @Test
   void getMostOrderedProductsSuccess() {
     //given
+    Pageable pageable = PageRequest.of(1, 3, Sort.by("ordered").descending());
+
     List<Product> productList = new ArrayList<>();
     for (int i = 0; i < 3; i++) {
       productList.add(Product.builder()
@@ -225,16 +238,16 @@ class ProductServiceImplTest {
           .build());
     }
 
-    given(productRepository.findAllBy(any())).willReturn(
-        productList);
+    Page<Product> productPage = new PageImpl<>(productList);
+
+    given(productRepository.findAll(pageable)).willReturn(productPage);
 
     //when
-    List<ProductInfo> result = productService.getMostOrderedProducts(1, 3);
+    List<ProductInfo> result = productService.getProducts(pageable);
 
     //then
     assertEquals(3, result.size());
     assertEquals("상품1", result.get(1).getName());
-    assertEquals(2, result.get(1).getPrice());
     assertEquals("카테고리1", result.get(1).getCategoryName());
   }
 

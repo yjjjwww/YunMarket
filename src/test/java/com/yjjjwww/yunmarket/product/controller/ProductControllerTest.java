@@ -28,6 +28,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -205,11 +208,13 @@ class ProductControllerTest {
       productInfos.add(ProductInfo.builder().build());
     }
 
+    Pageable pageable = PageRequest.of(1, 3, Sort.by("createdDate").descending());
+
     // when
-    given(productService.getLatestProducts(anyInt(), anyInt())).willReturn(productInfos);
+    given(productService.getProducts(pageable)).willReturn(productInfos);
 
     // then
-    MvcResult result = mockMvc.perform(get("/product/search/latest?page=1&size=3"))
+    MvcResult result = mockMvc.perform(get("/product/list?page=1&size=3&sort=createdDate,desc"))
         .andExpect(status().isOk())
         .andReturn();
 
@@ -229,11 +234,13 @@ class ProductControllerTest {
       productInfos.add(ProductInfo.builder().build());
     }
 
+    Pageable pageable = PageRequest.of(1, 3, Sort.by("price").ascending());
+
     // when
-    given(productService.getLowestPriceProducts(anyInt(), anyInt())).willReturn(productInfos);
+    given(productService.getProducts(pageable)).willReturn(productInfos);
 
     // then
-    MvcResult result = mockMvc.perform(get("/product/search/lowestPrice?page=1&size=3"))
+    MvcResult result = mockMvc.perform(get("/product/list?page=1&size=3&sort=price,asc"))
         .andExpect(status().isOk())
         .andReturn();
 
@@ -253,11 +260,13 @@ class ProductControllerTest {
       productInfos.add(ProductInfo.builder().build());
     }
 
+    Pageable pageable = PageRequest.of(1, 3, Sort.by("ordered").descending());
+
     // when
-    given(productService.getMostOrderedProducts(anyInt(), anyInt())).willReturn(productInfos);
+    given(productService.getProducts(pageable)).willReturn(productInfos);
 
     // then
-    MvcResult result = mockMvc.perform(get("/product/search/ordered?page=1&size=3"))
+    MvcResult result = mockMvc.perform(get("/product/list?page=1&size=3&sort=ordered,desc"))
         .andExpect(status().isOk())
         .andReturn();
 

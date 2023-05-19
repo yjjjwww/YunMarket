@@ -35,7 +35,7 @@ public class ProductController {
     return ResponseEntity.ok(REGISTER_PRODUCT_SUCCESS);
   }
 
-  @GetMapping("/search/")
+  @GetMapping("/list")
   public ResponseEntity<List<ProductInfo>> getLatestProducts(Pageable pageable) {
     return ResponseEntity.ok(productService.getProducts(pageable));
   }
