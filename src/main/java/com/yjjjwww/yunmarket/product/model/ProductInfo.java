@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Page;
 
 @Data
 @Builder
@@ -22,7 +23,7 @@ public class ProductInfo {
   private String image;
   private String categoryName;
 
-  public static List<ProductInfo> toList(List<Product> products) {
+  public static List<ProductInfo> toList(Page<Product> products) {
     return products.stream()
         .map(product -> ProductInfo.builder()
             .name(product.getName())

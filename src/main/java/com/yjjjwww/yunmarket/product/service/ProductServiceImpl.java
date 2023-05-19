@@ -16,9 +16,9 @@ import com.yjjjwww.yunmarket.seller.entity.Seller;
 import com.yjjjwww.yunmarket.seller.repository.SellerRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -63,28 +63,8 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public List<ProductInfo> getLatestProducts(Integer page, Integer size) {
-    Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdDate").descending());
-
-    List<Product> products = productRepository.findAllBy(pageable);
-
-    return ProductInfo.toList(products);
-  }
-
-  @Override
-  public List<ProductInfo> getLowestPriceProducts(Integer page, Integer size) {
-    Pageable pageable = PageRequest.of(page - 1, size,
-        Sort.by("price").ascending().and(Sort.by("createdDate").descending()));
-    List<Product> products = productRepository.findAllBy(pageable);
-
-    return ProductInfo.toList(products);
-  }
-
-  @Override
-  public List<ProductInfo> getMostOrderedProducts(Integer page, Integer size) {
-    Pageable pageable = PageRequest.of(page - 1, size,
-        Sort.by("orderedCnt").descending().and(Sort.by("createdDate").descending()));
-    List<Product> products = productRepository.findAllBy(pageable);
+  public List<ProductInfo> getProducts(Pageable pageable) {
+    Page<Product> products = productRepository.findAll(pageable);
 
     return ProductInfo.toList(products);
   }
