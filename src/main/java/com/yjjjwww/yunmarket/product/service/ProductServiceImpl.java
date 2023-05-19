@@ -92,7 +92,8 @@ public class ProductServiceImpl implements ProductService {
   @Override
   public List<ProductInfo> searchProducts(String keyword, Integer page, Integer size) {
     Pageable pageable = PageRequest.of(page - 1, size);
-    List<ProductDocument> products = elasticSearchProductRepository.findByNameOrDescription(keyword, pageable);
+    List<ProductDocument> products = elasticSearchProductRepository.findByNameOrDescription(keyword,
+        pageable);
 
     return ProductInfo.toListFromDocument(products);
   }
