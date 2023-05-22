@@ -78,6 +78,14 @@ public class ProductServiceImpl implements ProductService {
     return ProductInfo.toListFromDocument(products);
   }
 
+  @Override
+  public ProductInfo getProductInfo(Long id) {
+    Product product = productRepository.findById(id)
+        .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+    return ProductInfo.from(product);
+  }
+
   private static boolean isStringEmpty(String str) {
     return str == null || str.isBlank();
   }
