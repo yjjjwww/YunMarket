@@ -3,6 +3,7 @@ package com.yjjjwww.yunmarket.product.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
@@ -300,5 +301,46 @@ class ProductControllerTest {
         });
 
     assertEquals(3, actualProductInfos.size());
+  }
+
+  @Test
+  void getProductInfoSuccess() throws Exception {
+    //given
+    ProductInfo product = ProductInfo.builder()
+        .id(1L)
+        .name("상품 이름")
+        .price(1000)
+        .description("상품 설명")
+        .quantity(30)
+        .image("이미지 주소")
+        .categoryName("상품 카테고리")
+        .build();
+
+    //when
+    given(productService.getProductInfo(anyLong())).willReturn(product);
+
+    //then
+    mockMvc.perform(get("/product/info/1"))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void getProductInfoFail_PRODUCT_NOT_FOUND() throws Exception {
+    //given
+
+    //when
+    doThrow(new CustomException(ErrorCode.PRODUCT_NOT_FOUND))
+        .when(productService)
+        .getProductInfo(anyLong());
+    //when
+    //then
+    ResultActions result = mockMvc.perform(get("/product/info/1"));
+    result.andExpect(status().isBadRequest())
+        .andDo(print());
+    String responseBody = result.andReturn().getResponse().getContentAsString();
+    JsonNode responseJson = objectMapper.readTree(responseBody);
+    String code = responseJson.get("code").asText();
+
+    assertEquals("PRODUCT_NOT_FOUND", code);
   }
 }
