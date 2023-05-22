@@ -6,9 +6,11 @@ import com.yjjjwww.yunmarket.exception.CustomException;
 import com.yjjjwww.yunmarket.exception.ErrorCode;
 import com.yjjjwww.yunmarket.product.entity.Category;
 import com.yjjjwww.yunmarket.product.entity.Product;
+import com.yjjjwww.yunmarket.product.entity.ProductDocument;
 import com.yjjjwww.yunmarket.product.model.ProductInfo;
 import com.yjjjwww.yunmarket.product.model.ProductRegisterServiceForm;
 import com.yjjjwww.yunmarket.product.repository.CategoryRepository;
+import com.yjjjwww.yunmarket.product.repository.ElasticSearchProductRepository;
 import com.yjjjwww.yunmarket.product.repository.ProductRepository;
 import com.yjjjwww.yunmarket.seller.entity.Seller;
 import com.yjjjwww.yunmarket.seller.repository.SellerRepository;
@@ -26,6 +28,7 @@ public class ProductServiceImpl implements ProductService {
   private final JwtTokenProvider provider;
   private final SellerRepository sellerRepository;
   private final ProductRepository productRepository;
+  private final ElasticSearchProductRepository elasticSearchProductRepository;
   private final CategoryRepository categoryRepository;
 
   @Override
@@ -56,6 +59,7 @@ public class ProductServiceImpl implements ProductService {
         .build();
 
     productRepository.save(product);
+    elasticSearchProductRepository.save(ProductDocument.from(product));
   }
 
   @Override
@@ -83,6 +87,15 @@ public class ProductServiceImpl implements ProductService {
     List<Product> products = productRepository.findAllBy(pageable);
 
     return ProductInfo.toList(products);
+  }
+
+  @Override
+  public List<ProductInfo> searchProducts(String keyword, Integer page, Integer size) {
+    Pageable pageable = PageRequest.of(page - 1, size);
+    List<ProductDocument> products = elasticSearchProductRepository.findByNameOrDescription(keyword,
+        pageable);
+
+    return ProductInfo.toListFromDocument(products);
   }
 
   private static boolean isStringEmpty(String str) {

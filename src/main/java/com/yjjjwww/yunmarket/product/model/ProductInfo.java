@@ -1,6 +1,7 @@
 package com.yjjjwww.yunmarket.product.model;
 
 import com.yjjjwww.yunmarket.product.entity.Product;
+import com.yjjjwww.yunmarket.product.entity.ProductDocument;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -30,6 +31,19 @@ public class ProductInfo {
             .quantity(product.getQuantity())
             .image(product.getImage())
             .categoryName(product.getCategory().getName())
+            .build())
+        .collect(Collectors.toList());
+  }
+
+  public static List<ProductInfo> toListFromDocument(List<ProductDocument> products) {
+    return products.stream()
+        .map(product -> ProductInfo.builder()
+            .name(product.getName())
+            .price(product.getPrice())
+            .description(product.getDescription())
+            .quantity(product.getQuantity())
+            .image(product.getImage())
+            .categoryName(product.getCategoryName())
             .build())
         .collect(Collectors.toList());
   }

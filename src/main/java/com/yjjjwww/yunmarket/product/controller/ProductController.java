@@ -57,4 +57,13 @@ public class ProductController {
   ) {
     return ResponseEntity.ok(productService.getMostOrderedProducts(page, size));
   }
+
+  @GetMapping("/search")
+  public ResponseEntity<List<ProductInfo>> searchProducts(
+      @RequestParam("keyword") String keyword,
+      @RequestParam("page") Integer page,
+      @RequestParam("size") Integer size
+  ) {
+    return ResponseEntity.ok(productService.searchProducts(keyword, page, size));
+  }
 }

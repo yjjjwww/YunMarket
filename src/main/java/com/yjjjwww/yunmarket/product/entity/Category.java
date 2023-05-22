@@ -14,6 +14,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,6 +29,7 @@ public class Category {
   private Long id;
 
   @Column(unique = true)
+  @Field(type = FieldType.Text)
   String name;
 
   @OneToMany(mappedBy = "category", fetch = FetchType.EAGER)

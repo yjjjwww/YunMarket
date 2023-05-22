@@ -15,9 +15,11 @@ import com.yjjjwww.yunmarket.exception.CustomException;
 import com.yjjjwww.yunmarket.exception.ErrorCode;
 import com.yjjjwww.yunmarket.product.entity.Category;
 import com.yjjjwww.yunmarket.product.entity.Product;
+import com.yjjjwww.yunmarket.product.entity.ProductDocument;
 import com.yjjjwww.yunmarket.product.model.ProductInfo;
 import com.yjjjwww.yunmarket.product.model.ProductRegisterServiceForm;
 import com.yjjjwww.yunmarket.product.repository.CategoryRepository;
+import com.yjjjwww.yunmarket.product.repository.ElasticSearchProductRepository;
 import com.yjjjwww.yunmarket.product.repository.ProductRepository;
 import com.yjjjwww.yunmarket.seller.entity.Seller;
 import com.yjjjwww.yunmarket.seller.repository.SellerRepository;
@@ -38,6 +40,9 @@ class ProductServiceImplTest {
 
   @Mock
   private ProductRepository productRepository;
+
+  @Mock
+  private ElasticSearchProductRepository elasticSearchProductRepository;
 
   @Mock
   private CategoryRepository categoryRepository;
@@ -225,6 +230,34 @@ class ProductServiceImplTest {
 
     //when
     List<ProductInfo> result = productService.getMostOrderedProducts(1, 3);
+
+    //then
+    assertEquals(3, result.size());
+    assertEquals("상품1", result.get(1).getName());
+    assertEquals(2, result.get(1).getPrice());
+    assertEquals("카테고리1", result.get(1).getCategoryName());
+  }
+
+  @Test
+  void searchProductsSuccess() {
+    //given
+    List<ProductDocument> productList = new ArrayList<>();
+    for (int i = 0; i < 3; i++) {
+      productList.add(ProductDocument.builder()
+          .name("상품" + i)
+          .price(i + 1)
+          .description("상품" + i + "설명")
+          .quantity(100 + i)
+          .image("상품" + i + "이미지")
+          .categoryName("카테고리" + i)
+          .build());
+    }
+
+    given(elasticSearchProductRepository.findByNameOrDescription(anyString(), any())).willReturn(
+        productList);
+
+    //when
+    List<ProductInfo> result = productService.searchProducts("상품", 1, 3);
 
     //then
     assertEquals(3, result.size());
