@@ -25,14 +25,14 @@ public class ProductDocument {
   private String name;
 
   private String categoryName;
-  private Integer price;
+  private int price;
 
   @Field(type = FieldType.Text, analyzer = "ngram_analyzer")
   private String description;
   private Integer quantity;
   private String image;
   private Integer orderedCnt;
-  boolean deletedYn;
+  private boolean deletedYn;
 
   public static ProductDocument from(Product product) {
     return ProductDocument.builder()
