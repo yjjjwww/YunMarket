@@ -3,6 +3,7 @@ package com.yjjjwww.yunmarket.product.service;
 import com.yjjjwww.yunmarket.product.model.ProductInfo;
 import com.yjjjwww.yunmarket.product.model.ProductRegisterServiceForm;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 public interface ProductService {
 
@@ -12,19 +13,9 @@ public interface ProductService {
   void register(String token, ProductRegisterServiceForm productRegisterServiceForm);
 
   /**
-   * 상품 최신순 조회
+   * 상품 조회
    */
-  List<ProductInfo> getLatestProducts(Integer page, Integer size);
-
-  /**
-   * 상품 낮은 가격순 조회
-   */
-  List<ProductInfo> getLowestPriceProducts(Integer page, Integer size);
-
-  /**
-   * 상품 낮은 가격순 조회
-   */
-  List<ProductInfo> getMostOrderedProducts(Integer page, Integer size);
+  List<ProductInfo> getProducts(Pageable pageable);
 
   /**
    * 상품 검색

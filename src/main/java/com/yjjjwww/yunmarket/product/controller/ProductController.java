@@ -5,6 +5,7 @@ import com.yjjjwww.yunmarket.product.model.ProductRegisterForm;
 import com.yjjjwww.yunmarket.product.service.ProductService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,28 +35,9 @@ public class ProductController {
     return ResponseEntity.ok(REGISTER_PRODUCT_SUCCESS);
   }
 
-  @GetMapping("/search/latest")
-  public ResponseEntity<List<ProductInfo>> getLatestProducts(
-      @RequestParam("page") Integer page,
-      @RequestParam("size") Integer size
-  ) {
-    return ResponseEntity.ok(productService.getLatestProducts(page, size));
-  }
-
-  @GetMapping("/search/lowestPrice")
-  public ResponseEntity<List<ProductInfo>> getLowestPriceProducts(
-      @RequestParam("page") Integer page,
-      @RequestParam("size") Integer size
-  ) {
-    return ResponseEntity.ok(productService.getLowestPriceProducts(page, size));
-  }
-
-  @GetMapping("/search/ordered")
-  public ResponseEntity<List<ProductInfo>> getMostOrderedProducts(
-      @RequestParam("page") Integer page,
-      @RequestParam("size") Integer size
-  ) {
-    return ResponseEntity.ok(productService.getMostOrderedProducts(page, size));
+  @GetMapping("/list")
+  public ResponseEntity<List<ProductInfo>> getLatestProducts(Pageable pageable) {
+    return ResponseEntity.ok(productService.getProducts(pageable));
   }
 
   @GetMapping("/search")
