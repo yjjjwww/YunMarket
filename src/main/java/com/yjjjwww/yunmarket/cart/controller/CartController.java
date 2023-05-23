@@ -27,7 +27,7 @@ public class CartController {
       @RequestHeader(name = TOKEN_HEADER) String token,
       @RequestBody AddCartForm form
   ) {
-    cartService.addCart(form);
+    cartService.addCart(token, form);
     return ResponseEntity.ok(ADD_CART_SUCCESS);
   }
 }

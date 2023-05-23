@@ -7,5 +7,5 @@ public interface CartService {
   /**
    * 장바구니 추가
    */
-  void addCart(AddCartForm form);
+  void addCart(String token, AddCartForm form);
 }

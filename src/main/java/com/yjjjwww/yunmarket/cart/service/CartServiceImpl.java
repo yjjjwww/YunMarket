@@ -3,6 +3,8 @@ package com.yjjjwww.yunmarket.cart.service;
 import com.yjjjwww.yunmarket.cart.entity.Cart;
 import com.yjjjwww.yunmarket.cart.model.AddCartForm;
 import com.yjjjwww.yunmarket.cart.repository.CartRepository;
+import com.yjjjwww.yunmarket.common.UserVo;
+import com.yjjjwww.yunmarket.config.JwtTokenProvider;
 import com.yjjjwww.yunmarket.customer.entity.Customer;
 import com.yjjjwww.yunmarket.customer.repository.CustomerRepository;
 import com.yjjjwww.yunmarket.exception.CustomException;
@@ -20,18 +22,20 @@ public class CartServiceImpl implements CartService {
   private final CustomerRepository customerRepository;
   private final ProductRepository productRepository;
   private final CartRepository cartRepository;
+  private final JwtTokenProvider provider;
 
   @Override
-  public void addCart(AddCartForm form) {
+  public void addCart(String token, AddCartForm form) {
+    UserVo vo = provider.getUserVo(token);
 
-    Customer customer = customerRepository.findById(form.getCustomerId())
+    Customer customer = customerRepository.findById(vo.getId())
         .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
     Product product = productRepository.findById(form.getProductId())
         .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
     Optional<Cart> optionalExistCart = cartRepository.findByCustomerIdAndProductId(
-        form.getCustomerId(),
+        vo.getId(),
         form.getProductId());
 
     if (optionalExistCart.isPresent()) {
