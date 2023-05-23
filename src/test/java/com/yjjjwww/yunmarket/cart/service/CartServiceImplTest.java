@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 
 import com.yjjjwww.yunmarket.cart.entity.Cart;
 import com.yjjjwww.yunmarket.cart.model.AddCartForm;
+import com.yjjjwww.yunmarket.cart.model.EditCartForm;
 import com.yjjjwww.yunmarket.cart.repository.CartRepository;
 import com.yjjjwww.yunmarket.common.UserVo;
 import com.yjjjwww.yunmarket.config.JwtTokenProvider;
@@ -175,6 +176,166 @@ class CartServiceImplTest {
     //when
     CustomException exception = assertThrows(CustomException.class,
         () -> cartService.addCart("token", form));
+
+    //then
+    assertEquals(ErrorCode.NOT_ENOUGH_QUANTITY, exception.getErrorCode());
+  }
+
+  @Test
+  void editCartSuccess() {
+    //given
+    EditCartForm form = EditCartForm.builder()
+        .productId(1L)
+        .quantity(30)
+        .build();
+
+    Customer customer = Customer.builder()
+        .id(1L)
+        .build();
+
+    Product product = Product.builder()
+        .id(1L)
+        .quantity(100)
+        .build();
+
+    given(provider.getUserVo(anyString()))
+        .willReturn(new UserVo(1L, "yjjjwww@naver.com"));
+
+    given(customerRepository.findById(anyLong())).willReturn(
+        Optional.ofNullable(customer));
+
+    given(productRepository.findById(anyLong())).willReturn(
+        Optional.ofNullable(product));
+
+    given(cartRepository.findByCustomerIdAndProductId(anyLong(), anyLong())).willReturn(
+        Optional.ofNullable(Cart.builder()
+            .customer(customer)
+            .product(product)
+            .quantity(100)
+            .build()));
+
+    //when
+    cartService.editCart("jwt", form);
+
+    //then
+    verify(cartRepository, times(1)).save(any(Cart.class));
+  }
+
+  @Test
+  void editCartFail_USER_NOT_FOUND() {
+    //given
+    EditCartForm form = EditCartForm.builder()
+        .productId(1L)
+        .quantity(30)
+        .build();
+
+    given(provider.getUserVo(anyString()))
+        .willReturn(new UserVo(1L, "yjjjwww@naver.com"));
+
+    //when
+    CustomException exception = assertThrows(CustomException.class,
+        () -> cartService.editCart("token", form));
+
+    //then
+    assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+  }
+
+  @Test
+  void editCartFail_PRODUCT_NOT_FOUND() {
+    //given
+    EditCartForm form = EditCartForm.builder()
+        .productId(1L)
+        .quantity(30)
+        .build();
+
+    Customer customer = Customer.builder()
+        .id(1L)
+        .build();
+
+    given(provider.getUserVo(anyString()))
+        .willReturn(new UserVo(1L, "yjjjwww@naver.com"));
+
+    given(customerRepository.findById(anyLong())).willReturn(
+        Optional.ofNullable(customer));
+
+    //when
+    CustomException exception = assertThrows(CustomException.class,
+        () -> cartService.editCart("token", form));
+
+    //then
+    assertEquals(ErrorCode.PRODUCT_NOT_FOUND, exception.getErrorCode());
+  }
+
+  @Test
+  void editCartFail_CART_NOT_FOUND() {
+    //given
+    EditCartForm form = EditCartForm.builder()
+        .productId(1L)
+        .quantity(30)
+        .build();
+
+    Customer customer = Customer.builder()
+        .id(1L)
+        .build();
+
+    Product product = Product.builder()
+        .id(1L)
+        .quantity(100)
+        .build();
+
+    given(provider.getUserVo(anyString()))
+        .willReturn(new UserVo(1L, "yjjjwww@naver.com"));
+
+    given(customerRepository.findById(anyLong())).willReturn(
+        Optional.ofNullable(customer));
+
+    given(productRepository.findById(anyLong())).willReturn(
+        Optional.ofNullable(product));
+
+    //when
+    CustomException exception = assertThrows(CustomException.class,
+        () -> cartService.editCart("token", form));
+
+    //then
+    assertEquals(ErrorCode.CART_NOT_FOUND, exception.getErrorCode());
+  }
+
+  @Test
+  void editCartFail_NOT_ENOUGH_QUANTITY() {
+    //given
+    EditCartForm form = EditCartForm.builder()
+        .productId(1L)
+        .quantity(30)
+        .build();
+
+    Customer customer = Customer.builder()
+        .id(1L)
+        .build();
+
+    Product product = Product.builder()
+        .id(1L)
+        .quantity(20)
+        .build();
+
+    given(provider.getUserVo(anyString()))
+        .willReturn(new UserVo(1L, "yjjjwww@naver.com"));
+
+    given(customerRepository.findById(anyLong())).willReturn(
+        Optional.ofNullable(customer));
+
+    given(productRepository.findById(anyLong())).willReturn(
+        Optional.ofNullable(product));
+
+    given(cartRepository.findByCustomerIdAndProductId(anyLong(), anyLong())).willReturn(
+        Optional.ofNullable(Cart.builder()
+            .customer(customer)
+            .product(product)
+            .quantity(20)
+            .build()));
+
+    //when
+    CustomException exception = assertThrows(CustomException.class,
+        () -> cartService.editCart("token", form));
 
     //then
     assertEquals(ErrorCode.NOT_ENOUGH_QUANTITY, exception.getErrorCode());
