@@ -2,6 +2,7 @@ package com.yjjjwww.yunmarket.cart.service;
 
 import com.yjjjwww.yunmarket.cart.entity.Cart;
 import com.yjjjwww.yunmarket.cart.model.AddCartForm;
+import com.yjjjwww.yunmarket.cart.model.EditCartForm;
 import com.yjjjwww.yunmarket.cart.repository.CartRepository;
 import com.yjjjwww.yunmarket.common.UserVo;
 import com.yjjjwww.yunmarket.config.JwtTokenProvider;
@@ -64,6 +65,28 @@ public class CartServiceImpl implements CartService {
 
       cartRepository.save(cart);
     }
+  }
+
+  @Override
+  public void editCart(String token, EditCartForm form) {
+    UserVo vo = provider.getUserVo(token);
+
+    Customer customer = customerRepository.findById(vo.getId())
+        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+    Product product = productRepository.findById(form.getProductId())
+        .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+    Cart cart = cartRepository.findByCustomerIdAndProductId(customer.getId(), product.getId())
+        .orElseThrow(() -> new CustomException(ErrorCode.CART_NOT_FOUND));
+
+    if (!checkQuantity(product.getQuantity(), form.getQuantity())) {
+      throw new CustomException(ErrorCode.NOT_ENOUGH_QUANTITY);
+    }
+
+    cart.setQuantity(form.getQuantity());
+
+    cartRepository.save(cart);
   }
 
   private static boolean checkQuantity(Integer productQuantity, Integer cartQuantity) {
