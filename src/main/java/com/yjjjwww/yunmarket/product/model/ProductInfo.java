@@ -16,8 +16,9 @@ import org.springframework.data.domain.Page;
 @AllArgsConstructor
 public class ProductInfo {
 
+  private Long id;
   private String name;
-  private Integer price;
+  private int price;
   private String description;
   private Integer quantity;
   private String image;
@@ -26,6 +27,7 @@ public class ProductInfo {
   public static List<ProductInfo> toList(Page<Product> products) {
     return products.stream()
         .map(product -> ProductInfo.builder()
+            .id(product.getId())
             .name(product.getName())
             .price(product.getPrice())
             .description(product.getDescription())
@@ -39,6 +41,7 @@ public class ProductInfo {
   public static List<ProductInfo> toListFromDocument(List<ProductDocument> products) {
     return products.stream()
         .map(product -> ProductInfo.builder()
+            .id(product.getId())
             .name(product.getName())
             .price(product.getPrice())
             .description(product.getDescription())
@@ -47,5 +50,17 @@ public class ProductInfo {
             .categoryName(product.getCategoryName())
             .build())
         .collect(Collectors.toList());
+  }
+
+  public static ProductInfo from(Product product) {
+    return ProductInfo.builder()
+        .id(product.getId())
+        .name(product.getName())
+        .price(product.getPrice())
+        .description(product.getDescription())
+        .quantity(product.getQuantity())
+        .image(product.getImage())
+        .categoryName(product.getCategory().getName())
+        .build();
   }
 }

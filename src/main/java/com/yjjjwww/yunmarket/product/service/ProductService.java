@@ -21,4 +21,9 @@ public interface ProductService {
    * 상품 검색
    */
   List<ProductInfo> searchProducts(String name, Integer page, Integer size);
+
+  /**
+   * 상품 상세 정보 불러오기
+   */
+  ProductInfo getProductInfo(Long id);
 }

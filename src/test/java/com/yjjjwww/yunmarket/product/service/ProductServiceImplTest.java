@@ -278,4 +278,42 @@ class ProductServiceImplTest {
     assertEquals(2, result.get(1).getPrice());
     assertEquals("카테고리1", result.get(1).getCategoryName());
   }
+
+  @Test
+  void getProductInfoSuccess() {
+    //given
+    Product product = Product.builder()
+        .id(1L)
+        .name("상품 이름")
+        .price(1000)
+        .description("상품 설명")
+        .quantity(30)
+        .image("이미지 주소")
+        .category(Category.builder()
+            .id(1L)
+            .name("카테고리 이름")
+            .build())
+        .build();
+
+    given(productRepository.findById(anyLong())).willReturn(Optional.ofNullable(product));
+
+    //when
+    ProductInfo result = productService.getProductInfo(1L);
+
+    //then
+    assertEquals("상품 이름", result.getName());
+    assertEquals(1000, result.getPrice());
+    assertEquals("카테고리 이름", result.getCategoryName());
+  }
+
+  @Test
+  void getProductInfoFail_PRODUCT_NOT_FOUND() {
+    //given
+    //when
+    CustomException exception = assertThrows(CustomException.class,
+        () -> productService.getProductInfo(1L));
+
+    //then
+    assertEquals(ErrorCode.PRODUCT_NOT_FOUND, exception.getErrorCode());
+  }
 }
