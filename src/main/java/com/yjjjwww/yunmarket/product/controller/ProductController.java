@@ -6,6 +6,7 @@ import com.yjjjwww.yunmarket.product.service.ProductService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,14 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProductController {
 
   private final ProductService productService;
-  public static final String TOKEN_HEADER = "Authorization";
 
   private static final String REGISTER_PRODUCT_SUCCESS = "상품 등록 완료";
 
   @PostMapping
   @PreAuthorize("hasRole('SELLER')")
   public ResponseEntity<String> registerProduct(
-      @RequestHeader(name = TOKEN_HEADER) String token,
+      @RequestHeader(name = HttpHeaders.AUTHORIZATION) String token,
       @RequestBody ProductRegisterForm productRegisterForm) {
     productService.register(token, productRegisterForm.toServiceForm());
     return ResponseEntity.ok(REGISTER_PRODUCT_SUCCESS);
