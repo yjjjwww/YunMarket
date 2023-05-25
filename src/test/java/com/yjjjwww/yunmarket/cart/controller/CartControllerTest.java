@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -315,5 +316,33 @@ class CartControllerTest {
     String code = responseJson.get("code").asText();
 
     assertEquals("NOT_ENOUGH_QUANTITY", code);
+  }
+
+  @Test
+  @WithMockUser(roles = "CUSTOMER")
+  void deleteCartItemSuccess() throws Exception {
+    //given
+    String token = provider.createToken("yjjjwww@naver.com", 1L, UserType.CUSTOMER);
+
+    //when
+    //then
+    mockMvc.perform(delete("/cart/item/1")
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andDo(print());
+  }
+
+  @Test
+  @WithMockUser(roles = "CUSTOMER")
+  void deleteAllCartSuccess() throws Exception {
+    //given
+    String token = provider.createToken("yjjjwww@naver.com", 1L, UserType.CUSTOMER);
+
+    //when
+    //then
+    mockMvc.perform(delete("/cart/items")
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andDo(print());
   }
 }
