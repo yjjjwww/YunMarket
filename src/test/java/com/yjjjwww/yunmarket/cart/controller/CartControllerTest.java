@@ -5,12 +5,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yjjjwww.yunmarket.cart.model.AddCartForm;
+import com.yjjjwww.yunmarket.cart.model.EditCartForm;
 import com.yjjjwww.yunmarket.cart.service.CartService;
 import com.yjjjwww.yunmarket.common.UserType;
 import com.yjjjwww.yunmarket.config.JwtTokenProvider;
@@ -162,6 +164,147 @@ class CartControllerTest {
     //when
     //then
     ResultActions result = mockMvc.perform(post("/cart")
+        .header("Authorization", "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(form)));
+    result.andExpect(status().isBadRequest())
+        .andDo(print());
+    String responseBody = result.andReturn().getResponse().getContentAsString();
+    JsonNode responseJson = objectMapper.readTree(responseBody);
+    String code = responseJson.get("code").asText();
+
+    assertEquals("NOT_ENOUGH_QUANTITY", code);
+  }
+
+  @Test
+  @WithMockUser(roles = "CUSTOMER")
+  void editCartSuccess() throws Exception {
+    //given
+    EditCartForm form = EditCartForm.builder()
+        .productId(1L)
+        .quantity(30)
+        .build();
+
+    String token = provider.createToken("yjjjwww@naver.com", 1L, UserType.CUSTOMER);
+
+    //when
+    //then
+    mockMvc.perform(put("/cart")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(form)))
+        .andExpect(status().isOk())
+        .andDo(print());
+  }
+
+  @Test
+  @WithMockUser(roles = "CUSTOMER")
+  void editCartFail_USER_NOT_FOUND() throws Exception {
+    //given
+    EditCartForm form = EditCartForm.builder()
+        .productId(1L)
+        .quantity(30)
+        .build();
+
+    String token = provider.createToken("yjjjwww@naver.com", 1L, UserType.CUSTOMER);
+
+    doThrow(new CustomException(ErrorCode.USER_NOT_FOUND))
+        .when(cartService)
+        .editCart(anyString(), any());
+
+    //when
+    //then
+    ResultActions result = mockMvc.perform(put("/cart")
+        .header("Authorization", "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(form)));
+    result.andExpect(status().isBadRequest())
+        .andDo(print());
+    String responseBody = result.andReturn().getResponse().getContentAsString();
+    JsonNode responseJson = objectMapper.readTree(responseBody);
+    String code = responseJson.get("code").asText();
+
+    assertEquals("USER_NOT_FOUND", code);
+  }
+
+  @Test
+  @WithMockUser(roles = "CUSTOMER")
+  void editCartFail_PRODUCT_NOT_FOUND() throws Exception {
+    //given
+    EditCartForm form = EditCartForm.builder()
+        .productId(1L)
+        .quantity(30)
+        .build();
+
+    String token = provider.createToken("yjjjwww@naver.com", 1L, UserType.CUSTOMER);
+
+    doThrow(new CustomException(ErrorCode.PRODUCT_NOT_FOUND))
+        .when(cartService)
+        .editCart(anyString(), any());
+
+    //when
+    //then
+    ResultActions result = mockMvc.perform(put("/cart")
+        .header("Authorization", "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(form)));
+    result.andExpect(status().isBadRequest())
+        .andDo(print());
+    String responseBody = result.andReturn().getResponse().getContentAsString();
+    JsonNode responseJson = objectMapper.readTree(responseBody);
+    String code = responseJson.get("code").asText();
+
+    assertEquals("PRODUCT_NOT_FOUND", code);
+  }
+
+  @Test
+  @WithMockUser(roles = "CUSTOMER")
+  void editCartFail_CART_NOT_FOUND() throws Exception {
+    //given
+    EditCartForm form = EditCartForm.builder()
+        .productId(1L)
+        .quantity(30)
+        .build();
+
+    String token = provider.createToken("yjjjwww@naver.com", 1L, UserType.CUSTOMER);
+
+    doThrow(new CustomException(ErrorCode.CART_NOT_FOUND))
+        .when(cartService)
+        .editCart(anyString(), any());
+
+    //when
+    //then
+    ResultActions result = mockMvc.perform(put("/cart")
+        .header("Authorization", "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(form)));
+    result.andExpect(status().isBadRequest())
+        .andDo(print());
+    String responseBody = result.andReturn().getResponse().getContentAsString();
+    JsonNode responseJson = objectMapper.readTree(responseBody);
+    String code = responseJson.get("code").asText();
+
+    assertEquals("CART_NOT_FOUND", code);
+  }
+
+  @Test
+  @WithMockUser(roles = "CUSTOMER")
+  void editCartFail_NOT_ENOUGH_QUANTITY() throws Exception {
+    //given
+    EditCartForm form = EditCartForm.builder()
+        .productId(1L)
+        .quantity(30)
+        .build();
+
+    String token = provider.createToken("yjjjwww@naver.com", 1L, UserType.CUSTOMER);
+
+    doThrow(new CustomException(ErrorCode.NOT_ENOUGH_QUANTITY))
+        .when(cartService)
+        .editCart(anyString(), any());
+
+    //when
+    //then
+    ResultActions result = mockMvc.perform(put("/cart")
         .header("Authorization", "Bearer " + token)
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(form)));
