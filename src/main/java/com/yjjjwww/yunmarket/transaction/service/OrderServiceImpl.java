@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
-public class OrderServiceImpl implements OrderService{
+public class OrderServiceImpl implements OrderService {
 
   private final JwtTokenProvider provider;
   private final SellerRepository sellerRepository;
