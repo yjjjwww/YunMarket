@@ -15,6 +15,7 @@ import com.yjjjwww.yunmarket.product.repository.ProductRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -27,16 +28,13 @@ public class CartServiceImpl implements CartService {
 
   @Override
   public void addCart(String token, AddCartForm form) {
-    UserVo vo = provider.getUserVo(token);
-
-    Customer customer = customerRepository.findById(vo.getId())
-        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    Customer customer = getCustomerFromToken(token);
 
     Product product = productRepository.findById(form.getProductId())
         .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
     Optional<Cart> optionalExistCart = cartRepository.findByCustomerIdAndProductId(
-        vo.getId(),
+        customer.getId(),
         form.getProductId());
 
     if (optionalExistCart.isPresent()) {
@@ -69,10 +67,7 @@ public class CartServiceImpl implements CartService {
 
   @Override
   public void editCart(String token, EditCartForm form) {
-    UserVo vo = provider.getUserVo(token);
-
-    Customer customer = customerRepository.findById(vo.getId())
-        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    Customer customer = getCustomerFromToken(token);
 
     Product product = productRepository.findById(form.getProductId())
         .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -89,7 +84,39 @@ public class CartServiceImpl implements CartService {
     cartRepository.save(cart);
   }
 
+  @Override
+  public void deleteCartItem(String token, Long productId) {
+    Customer customer = getCustomerFromToken(token);
+
+    Product product = productRepository.findById(productId)
+        .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+    Cart cart = cartRepository.findByCustomerIdAndProductId(customer.getId(), product.getId())
+        .orElseThrow(() -> new CustomException(ErrorCode.CART_NOT_FOUND));
+
+    cartRepository.delete(cart);
+  }
+
+  @Override
+  @Transactional
+  public long deleteAllCart(String token) {
+    Customer customer = getCustomerFromToken(token);
+
+    Long cnt = cartRepository.deleteByCustomerId(customer.getId());
+
+    return cnt;
+  }
+
   private static boolean checkQuantity(Integer productQuantity, Integer cartQuantity) {
     return productQuantity >= cartQuantity;
+  }
+
+  private Customer getCustomerFromToken(String token) {
+    UserVo vo = provider.getUserVo(token);
+
+    Customer customer = customerRepository.findById(vo.getId())
+        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+    return customer;
   }
 }

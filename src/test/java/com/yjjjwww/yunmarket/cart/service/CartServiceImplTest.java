@@ -340,4 +340,62 @@ class CartServiceImplTest {
     //then
     assertEquals(ErrorCode.NOT_ENOUGH_QUANTITY, exception.getErrorCode());
   }
+
+  @Test
+  void deleteCartItemSuccess() {
+    //given
+    Customer customer = Customer.builder()
+        .id(1L)
+        .build();
+
+    Product product = Product.builder()
+        .id(1L)
+        .quantity(100)
+        .build();
+
+    given(provider.getUserVo(anyString()))
+        .willReturn(new UserVo(1L, "yjjjwww@naver.com"));
+
+    given(customerRepository.findById(anyLong())).willReturn(
+        Optional.ofNullable(customer));
+
+    given(productRepository.findById(anyLong())).willReturn(
+        Optional.ofNullable(product));
+
+    given(cartRepository.findByCustomerIdAndProductId(anyLong(), anyLong())).willReturn(
+        Optional.ofNullable(Cart.builder()
+            .customer(customer)
+            .product(product)
+            .quantity(100)
+            .build()));
+
+    //when
+    cartService.deleteCartItem("jwt", 1L);
+
+    //then
+    verify(cartRepository, times(1)).delete(any(Cart.class));
+  }
+
+  @Test
+  void deleteAllCartSuccess() {
+    //given
+    Customer customer = Customer.builder()
+        .id(1L)
+        .build();
+
+    given(provider.getUserVo(anyString()))
+        .willReturn(new UserVo(1L, "yjjjwww@naver.com"));
+
+    given(customerRepository.findById(anyLong())).willReturn(
+        Optional.ofNullable(customer));
+
+    given(cartRepository.deleteByCustomerId(anyLong())).willReturn(3L);
+
+    //when
+    long result = cartService.deleteAllCart("jwt");
+
+    //then
+    verify(cartRepository, times(1)).deleteByCustomerId(anyLong());
+    assertEquals(3L, result);
+  }
 }
