@@ -8,14 +8,18 @@ import com.yjjjwww.yunmarket.exception.CustomException;
 import com.yjjjwww.yunmarket.exception.ErrorCode;
 import com.yjjjwww.yunmarket.product.entity.Product;
 import com.yjjjwww.yunmarket.review.entity.Review;
+import com.yjjjwww.yunmarket.review.model.ReviewDto;
 import com.yjjjwww.yunmarket.review.model.ReviewRegisterServiceForm;
 import com.yjjjwww.yunmarket.review.repository.ReviewRepository;
 import com.yjjjwww.yunmarket.seller.entity.Seller;
 import com.yjjjwww.yunmarket.transaction.entity.Ordered;
 import com.yjjjwww.yunmarket.transaction.repository.OrderedRepository;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -61,6 +65,19 @@ public class ReviewServiceImpl implements ReviewService {
         .build();
 
     reviewRepository.save(review);
+  }
+
+  @Override
+  public List<ReviewDto> getReviews(Long productId, Integer page, Integer size) {
+    Pageable pageable = PageRequest.of(page - 1, size);
+
+    List<Review> reviewList = reviewRepository.findByProductId(productId, pageable);
+
+    if (reviewList.size() == 0) {
+      throw new CustomException(ErrorCode.REVIEW_NOT_FOUND);
+    }
+
+    return ReviewDto.toDtoList(reviewList);
   }
 
   private Customer getCustomerFromToken(String token) {
