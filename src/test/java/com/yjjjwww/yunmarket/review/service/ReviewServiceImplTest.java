@@ -17,10 +17,14 @@ import com.yjjjwww.yunmarket.exception.CustomException;
 import com.yjjjwww.yunmarket.exception.ErrorCode;
 import com.yjjjwww.yunmarket.product.entity.Product;
 import com.yjjjwww.yunmarket.review.entity.Review;
+import com.yjjjwww.yunmarket.review.entity.ReviewComment;
+import com.yjjjwww.yunmarket.review.model.ReviewCommentRegisterServiceForm;
 import com.yjjjwww.yunmarket.review.model.ReviewDto;
 import com.yjjjwww.yunmarket.review.model.ReviewRegisterServiceForm;
+import com.yjjjwww.yunmarket.review.repository.ReviewCommentRepository;
 import com.yjjjwww.yunmarket.review.repository.ReviewRepository;
 import com.yjjjwww.yunmarket.seller.entity.Seller;
+import com.yjjjwww.yunmarket.seller.repository.SellerRepository;
 import com.yjjjwww.yunmarket.transaction.entity.Ordered;
 import com.yjjjwww.yunmarket.transaction.repository.OrderedRepository;
 import java.util.ArrayList;
@@ -42,10 +46,16 @@ class ReviewServiceImplTest {
   private CustomerRepository customerRepository;
 
   @Mock
+  private SellerRepository sellerRepository;
+
+  @Mock
   private OrderedRepository orderedRepository;
 
   @Mock
   private ReviewRepository reviewRepository;
+
+  @Mock
+  private ReviewCommentRepository reviewCommentRepository;
 
   @InjectMocks
   private ReviewServiceImpl reviewService;
@@ -243,6 +253,7 @@ class ReviewServiceImplTest {
   void getReviewsSuccess() {
     //given
     List<Review> reviewList = new ArrayList<>();
+    List<ReviewComment> reviewCommentList = new ArrayList<>();
 
     for (int i = 0; i < 3; i++) {
       Customer customer = Customer.builder()
@@ -252,6 +263,7 @@ class ReviewServiceImplTest {
           .customer(customer)
           .rating(i + 5)
           .contents("리뷰내용")
+          .reviewCommentList(reviewCommentList)
           .build();
       reviewList.add(review);
     }
@@ -280,5 +292,118 @@ class ReviewServiceImplTest {
 
     //then
     assertEquals(ErrorCode.REVIEW_NOT_FOUND, exception.getErrorCode());
+  }
+
+  @Test
+  void registerReviewCommentSuccess() {
+    //given
+    ReviewCommentRegisterServiceForm form = ReviewCommentRegisterServiceForm.builder()
+        .reviewId(1L)
+        .contents("리뷰")
+        .build();
+
+    given(provider.getUserVo(anyString()))
+        .willReturn(new UserVo(1L, "yjjjwww@naver.com"));
+
+    Seller seller = Seller.builder()
+        .id(1L)
+        .build();
+
+    Review review = Review.builder()
+        .id(1L)
+        .seller(seller)
+        .build();
+
+    given(sellerRepository.findById(anyLong()))
+        .willReturn(Optional.ofNullable(seller));
+
+    given(reviewRepository.findById(anyLong()))
+        .willReturn(Optional.ofNullable(review));
+
+    //when
+    reviewService.registerReviewComment("token", form);
+
+    //then
+    verify(reviewCommentRepository, times(1)).save(any(ReviewComment.class));
+  }
+
+  @Test
+  void registerReviewCommentFail_INVALID_REVIEW_FORM() {
+    //given
+    ReviewCommentRegisterServiceForm form = ReviewCommentRegisterServiceForm.builder()
+        .reviewId(1L)
+        .contents("")
+        .build();
+
+    //when
+    CustomException exception = assertThrows(CustomException.class,
+        () -> reviewService.registerReviewComment("token", form));
+
+    //then
+    assertEquals(ErrorCode.INVALID_REVIEW_FORM, exception.getErrorCode());
+  }
+
+  @Test
+  void registerReviewCommentFail_REVIEW_NOT_FOUND() {
+    //given
+    ReviewCommentRegisterServiceForm form = ReviewCommentRegisterServiceForm.builder()
+        .reviewId(1L)
+        .contents("댓글")
+        .build();
+
+    given(provider.getUserVo(anyString()))
+        .willReturn(new UserVo(1L, "yjjjwww@naver.com"));
+
+    Seller seller = Seller.builder()
+        .id(1L)
+        .build();
+
+    given(sellerRepository.findById(anyLong()))
+        .willReturn(Optional.ofNullable(seller));
+
+    //when
+    CustomException exception = assertThrows(CustomException.class,
+        () -> reviewService.registerReviewComment("token", form));
+
+    //then
+    assertEquals(ErrorCode.REVIEW_NOT_FOUND, exception.getErrorCode());
+  }
+
+  @Test
+  void registerReviewCommentFail_SELLER_NOT_MATCH() {
+    //given
+    ReviewCommentRegisterServiceForm form = ReviewCommentRegisterServiceForm.builder()
+        .reviewId(1L)
+        .contents("댓글")
+        .build();
+
+    given(provider.getUserVo(anyString()))
+        .willReturn(new UserVo(1L, "yjjjwww@naver.com"));
+
+    Seller seller = Seller.builder()
+        .id(1L)
+        .build();
+
+    Seller seller2 = Seller.builder()
+        .id(2L)
+        .build();
+
+    Review review = Review.builder()
+        .id(1L)
+        .seller(seller2)
+        .build();
+
+    given(sellerRepository.findById(anyLong()))
+        .willReturn(Optional.ofNullable(seller));
+
+    given(reviewRepository.findById(anyLong()))
+        .willReturn(Optional.ofNullable(review));
+
+    //when
+    CustomException exception = assertThrows(CustomException.class,
+        () -> reviewService.registerReviewComment("token", form));
+
+    //then
+    assertEquals(ErrorCode.SELLER_NOT_MATCH, exception.getErrorCode());
   }
 }

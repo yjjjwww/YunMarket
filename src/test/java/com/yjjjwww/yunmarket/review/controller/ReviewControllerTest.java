@@ -17,6 +17,7 @@ import com.yjjjwww.yunmarket.common.UserType;
 import com.yjjjwww.yunmarket.config.JwtTokenProvider;
 import com.yjjjwww.yunmarket.exception.CustomException;
 import com.yjjjwww.yunmarket.exception.ErrorCode;
+import com.yjjjwww.yunmarket.review.model.ReviewCommentRegisterForm;
 import com.yjjjwww.yunmarket.review.model.ReviewRegisterForm;
 import com.yjjjwww.yunmarket.review.service.ReviewService;
 import org.junit.jupiter.api.Test;
@@ -236,5 +237,132 @@ class ReviewControllerTest {
     String code = responseJson.get("code").asText();
 
     assertEquals("REVIEW_NOT_FOUND", code);
+  }
+
+  @Test
+  @WithMockUser(roles = "SELLER")
+  void registerReviewCommentSuccess() throws Exception {
+    //given
+    String token = provider.createToken("yjjjwww@naver.com", 1L, UserType.SELLER);
+    ReviewCommentRegisterForm form = ReviewCommentRegisterForm.builder()
+        .reviewId(1L)
+        .contents("댓글")
+        .build();
+
+    //when
+    //then
+    mockMvc.perform(post("/review/comment")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(form)))
+        .andExpect(status().isOk())
+        .andDo(print());
+  }
+
+  @Test
+  @WithMockUser(roles = "CUSTOMER")
+  void registerReviewCommentFail_CUSTOMER_CANNOT_REGISTER_COMMENT() throws Exception {
+    //given
+    String token = provider.createToken("yjjjwww@naver.com", 1L, UserType.CUSTOMER);
+    ReviewCommentRegisterForm form = ReviewCommentRegisterForm.builder()
+        .reviewId(1L)
+        .contents("댓글")
+        .build();
+
+    //when
+    //then
+    mockMvc.perform(post("/review/comment")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(form)))
+        .andExpect(status().isForbidden())
+        .andDo(print());
+  }
+
+  @Test
+  @WithMockUser(roles = "SELLER")
+  void registerReviewCommentFail_INVALID_REVIEW_FORM() throws Exception {
+    //given
+    String token = provider.createToken("yjjjwww@naver.com", 1L, UserType.SELLER);
+    ReviewCommentRegisterForm form = ReviewCommentRegisterForm.builder()
+        .reviewId(1L)
+        .contents("")
+        .build();
+
+    doThrow(new CustomException(ErrorCode.INVALID_REVIEW_FORM))
+        .when(reviewService)
+        .registerReviewComment(anyString(), any());
+
+    //when
+    //then
+    ResultActions result = mockMvc.perform(post("/review/comment")
+        .header("Authorization", "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(form)));
+    result.andExpect(status().isBadRequest())
+        .andDo(print());
+    String responseBody = result.andReturn().getResponse().getContentAsString();
+    JsonNode responseJson = objectMapper.readTree(responseBody);
+    String code = responseJson.get("code").asText();
+
+    assertEquals("INVALID_REVIEW_FORM", code);
+  }
+
+  @Test
+  @WithMockUser(roles = "SELLER")
+  void registerReviewCommentFail_REVIEW_NOT_FOUND() throws Exception {
+    //given
+    String token = provider.createToken("yjjjwww@naver.com", 1L, UserType.SELLER);
+    ReviewCommentRegisterForm form = ReviewCommentRegisterForm.builder()
+        .reviewId(1L)
+        .contents("댓글")
+        .build();
+
+    doThrow(new CustomException(ErrorCode.REVIEW_NOT_FOUND))
+        .when(reviewService)
+        .registerReviewComment(anyString(), any());
+
+    //when
+    //then
+    ResultActions result = mockMvc.perform(post("/review/comment")
+        .header("Authorization", "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(form)));
+    result.andExpect(status().isBadRequest())
+        .andDo(print());
+    String responseBody = result.andReturn().getResponse().getContentAsString();
+    JsonNode responseJson = objectMapper.readTree(responseBody);
+    String code = responseJson.get("code").asText();
+
+    assertEquals("REVIEW_NOT_FOUND", code);
+  }
+
+  @Test
+  @WithMockUser(roles = "SELLER")
+  void registerReviewCommentFail_SELLER_NOT_MATCH() throws Exception {
+    //given
+    String token = provider.createToken("yjjjwww@naver.com", 1L, UserType.SELLER);
+    ReviewCommentRegisterForm form = ReviewCommentRegisterForm.builder()
+        .reviewId(1L)
+        .contents("댓글")
+        .build();
+
+    doThrow(new CustomException(ErrorCode.SELLER_NOT_MATCH))
+        .when(reviewService)
+        .registerReviewComment(anyString(), any());
+
+    //when
+    //then
+    ResultActions result = mockMvc.perform(post("/review/comment")
+        .header("Authorization", "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(form)));
+    result.andExpect(status().isBadRequest())
+        .andDo(print());
+    String responseBody = result.andReturn().getResponse().getContentAsString();
+    JsonNode responseJson = objectMapper.readTree(responseBody);
+    String code = responseJson.get("code").asText();
+
+    assertEquals("SELLER_NOT_MATCH", code);
   }
 }
