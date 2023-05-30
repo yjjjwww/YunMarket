@@ -17,11 +17,14 @@ import com.yjjjwww.yunmarket.exception.CustomException;
 import com.yjjjwww.yunmarket.exception.ErrorCode;
 import com.yjjjwww.yunmarket.product.entity.Product;
 import com.yjjjwww.yunmarket.review.entity.Review;
+import com.yjjjwww.yunmarket.review.model.ReviewDto;
 import com.yjjjwww.yunmarket.review.model.ReviewRegisterServiceForm;
 import com.yjjjwww.yunmarket.review.repository.ReviewRepository;
 import com.yjjjwww.yunmarket.seller.entity.Seller;
 import com.yjjjwww.yunmarket.transaction.entity.Ordered;
 import com.yjjjwww.yunmarket.transaction.repository.OrderedRepository;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -234,5 +237,48 @@ class ReviewServiceImplTest {
 
     //then
     assertEquals(ErrorCode.CUSTOMER_NOT_MATCH, exception.getErrorCode());
+  }
+
+  @Test
+  void getReviewsSuccess() {
+    //given
+    List<Review> reviewList = new ArrayList<>();
+
+    for (int i = 0; i < 3; i++) {
+      Customer customer = Customer.builder()
+          .email(i + "@naver.com")
+          .build();
+      Review review = Review.builder()
+          .customer(customer)
+          .rating(i + 5)
+          .contents("리뷰내용")
+          .build();
+      reviewList.add(review);
+    }
+
+    given(reviewRepository.findByProductId(anyLong(), any()))
+        .willReturn(reviewList);
+
+    //when
+    List<ReviewDto> result = reviewService.getReviews(1L, 2, 5);
+
+    //then
+    assertEquals(3, result.size());
+  }
+
+  @Test
+  void getReviewsFail_REVIEW_NOT_FOUND() {
+    //given
+    List<Review> reviewList = new ArrayList<>();
+
+    given(reviewRepository.findByProductId(anyLong(), any()))
+        .willReturn(reviewList);
+
+    //when
+    CustomException exception = assertThrows(CustomException.class,
+        () -> reviewService.getReviews(1L, 2, 5));
+
+    //then
+    assertEquals(ErrorCode.REVIEW_NOT_FOUND, exception.getErrorCode());
   }
 }

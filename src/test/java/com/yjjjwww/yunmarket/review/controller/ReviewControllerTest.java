@@ -2,8 +2,11 @@ package com.yjjjwww.yunmarket.review.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -202,5 +205,36 @@ class ReviewControllerTest {
     String code = responseJson.get("code").asText();
 
     assertEquals("CUSTOMER_NOT_MATCH", code);
+  }
+
+  @Test
+  void getReviewsSuccess() throws Exception {
+    //given
+    String token = provider.createToken("yjjjwww@naver.com", 1L, UserType.CUSTOMER);
+
+    //when
+    //then
+    mockMvc.perform(get("/review?productId=1&page=1&size=1"))
+        .andExpect(status().isOk())
+        .andDo(print());
+  }
+
+  @Test
+  void getReviewsFail_REVIEW_NOT_FOUND() throws Exception {
+    //given
+    doThrow(new CustomException(ErrorCode.REVIEW_NOT_FOUND))
+        .when(reviewService)
+        .getReviews(anyLong(), anyInt(), anyInt());
+
+    //when
+    //then
+    ResultActions result = mockMvc.perform(get("/review?productId=1&page=1&size=1"));
+    result.andExpect(status().isBadRequest())
+        .andDo(print());
+    String responseBody = result.andReturn().getResponse().getContentAsString();
+    JsonNode responseJson = objectMapper.readTree(responseBody);
+    String code = responseJson.get("code").asText();
+
+    assertEquals("REVIEW_NOT_FOUND", code);
   }
 }
