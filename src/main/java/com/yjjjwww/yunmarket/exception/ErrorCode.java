@@ -10,6 +10,7 @@ public enum ErrorCode {
   INVALID_PRODUCT_REGISTER(HttpStatus.BAD_REQUEST, "상품 등록 내용을 확인해주세요."),
   USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "사용자를 찾을 수 없습니다."),
   CUSTOMER_NOT_MATCH(HttpStatus.BAD_REQUEST, "해당 주문의 구매자가 아닙니다."),
+  SELLER_NOT_MATCH(HttpStatus.BAD_REQUEST, "해당 주문의 판매자가 아닙니다."),
   REVIEW_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "해당 주문의 리뷰가 이미 존재합니다."),
   REVIEW_NOT_FOUND(HttpStatus.BAD_REQUEST, "리뷰를 찾을 수 없습니다."),
   PRODUCT_NOT_FOUND(HttpStatus.BAD_REQUEST, "상품을 찾을 수 없습니다."),

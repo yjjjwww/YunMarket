@@ -17,6 +17,7 @@ public class ReviewDto {
   private String customerEmail;
   private Integer rating;
   private String contents;
+  private List<ReviewCommentDto> commentDtoList;
 
   public static List<ReviewDto> toDtoList(List<Review> reviews) {
     return reviews.stream()
@@ -24,6 +25,7 @@ public class ReviewDto {
             .customerEmail(review.getCustomer().getEmail())
             .rating(review.getRating())
             .contents(review.getContents())
+            .commentDtoList(ReviewCommentDto.toDtoList(review.getReviewCommentList()))
             .build())
         .collect(Collectors.toList());
   }

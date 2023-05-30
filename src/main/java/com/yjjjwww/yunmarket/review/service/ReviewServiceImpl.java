@@ -8,10 +8,14 @@ import com.yjjjwww.yunmarket.exception.CustomException;
 import com.yjjjwww.yunmarket.exception.ErrorCode;
 import com.yjjjwww.yunmarket.product.entity.Product;
 import com.yjjjwww.yunmarket.review.entity.Review;
+import com.yjjjwww.yunmarket.review.entity.ReviewComment;
+import com.yjjjwww.yunmarket.review.model.ReviewCommentRegisterServiceForm;
 import com.yjjjwww.yunmarket.review.model.ReviewDto;
 import com.yjjjwww.yunmarket.review.model.ReviewRegisterServiceForm;
+import com.yjjjwww.yunmarket.review.repository.ReviewCommentRepository;
 import com.yjjjwww.yunmarket.review.repository.ReviewRepository;
 import com.yjjjwww.yunmarket.seller.entity.Seller;
+import com.yjjjwww.yunmarket.seller.repository.SellerRepository;
 import com.yjjjwww.yunmarket.transaction.entity.Ordered;
 import com.yjjjwww.yunmarket.transaction.repository.OrderedRepository;
 import java.util.List;
@@ -28,8 +32,10 @@ public class ReviewServiceImpl implements ReviewService {
 
   private final JwtTokenProvider provider;
   private final CustomerRepository customerRepository;
+  private final SellerRepository sellerRepository;
   private final OrderedRepository orderedRepository;
   private final ReviewRepository reviewRepository;
+  private final ReviewCommentRepository reviewCommentRepository;
 
   @Override
   public void register(String token, ReviewRegisterServiceForm form) {
@@ -80,6 +86,29 @@ public class ReviewServiceImpl implements ReviewService {
     return ReviewDto.toDtoList(reviewList);
   }
 
+  @Override
+  public void registerReviewComment(String token, ReviewCommentRegisterServiceForm form) {
+    if (isStringEmpty(form.getContents())) {
+      throw new CustomException(ErrorCode.INVALID_REVIEW_FORM);
+    }
+
+    Seller seller = getSellerFromToken(token);
+    Review review = reviewRepository.findById(form.getReviewId())
+        .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+
+    if (!Objects.equals(seller.getId(), review.getSeller().getId())) {
+      throw new CustomException(ErrorCode.SELLER_NOT_MATCH);
+    }
+
+    ReviewComment reviewComment = ReviewComment.builder()
+        .review(review)
+        .contents(form.getContents())
+        .deletedYn(false)
+        .build();
+
+    reviewCommentRepository.save(reviewComment);
+  }
+
   private Customer getCustomerFromToken(String token) {
     UserVo vo = provider.getUserVo(token);
 
@@ -87,6 +116,15 @@ public class ReviewServiceImpl implements ReviewService {
         .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
     return customer;
+  }
+
+  private Seller getSellerFromToken(String token) {
+    UserVo vo = provider.getUserVo(token);
+
+    Seller seller = sellerRepository.findById(vo.getId())
+        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+    return seller;
   }
 
   private boolean checkReviewRegisterForm(ReviewRegisterServiceForm form) {

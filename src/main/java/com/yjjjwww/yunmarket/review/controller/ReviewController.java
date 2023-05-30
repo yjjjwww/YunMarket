@@ -1,5 +1,6 @@
 package com.yjjjwww.yunmarket.review.controller;
 
+import com.yjjjwww.yunmarket.review.model.ReviewCommentRegisterForm;
 import com.yjjjwww.yunmarket.review.model.ReviewDto;
 import com.yjjjwww.yunmarket.review.model.ReviewRegisterForm;
 import com.yjjjwww.yunmarket.review.service.ReviewService;
@@ -24,6 +25,7 @@ public class ReviewController {
   private final ReviewService reviewService;
 
   private static final String REGISTER_REVIEW_SUCCESS = "리뷰 등록 완료";
+  private static final String REGISTER_REVIEW_COMMENT_SUCCESS = "리뷰 댓글 등록 완료";
 
   @PostMapping
   @PreAuthorize("hasRole('CUSTOMER')")
@@ -41,5 +43,14 @@ public class ReviewController {
       @RequestParam("size") Integer size
   ) {
     return ResponseEntity.ok(reviewService.getReviews(productId, page, size));
+  }
+
+  @PostMapping("/comment")
+  @PreAuthorize("hasRole('SELLER')")
+  public ResponseEntity<String> registerReviewComment(
+      @RequestHeader(name = HttpHeaders.AUTHORIZATION) String token,
+      @RequestBody ReviewCommentRegisterForm reviewCommentRegisterForm) {
+    reviewService.registerReviewComment(token, reviewCommentRegisterForm.toServiceForm());
+    return ResponseEntity.ok(REGISTER_REVIEW_COMMENT_SUCCESS);
   }
 }
