@@ -43,7 +43,7 @@ public class ProductDocument {
         .description(product.getDescription())
         .quantity(product.getQuantity())
         .image(product.getImage())
-        .orderedCnt(product.orderedCnt)
+        .orderedCnt(product.getOrderedCnt())
         .deletedYn(product.isDeletedYn())
         .build();
   }

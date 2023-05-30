@@ -31,11 +31,11 @@ public class Seller extends BaseEntity {
   private Long id;
 
   @Column(unique = true)
-  String email;
+  private String email;
 
-  String password;
-  String phone;
-  boolean deletedYn;
+  private String password;
+  private String phone;
+  private boolean deletedYn;
 
   @OneToMany(mappedBy = "seller", fetch = FetchType.EAGER)
   @ToString.Exclude
