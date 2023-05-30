@@ -14,6 +14,8 @@ import com.yjjjwww.yunmarket.seller.entity.Seller;
 import com.yjjjwww.yunmarket.seller.repository.SellerRepository;
 import com.yjjjwww.yunmarket.transaction.entity.Ordered;
 import com.yjjjwww.yunmarket.transaction.entity.Transaction;
+import com.yjjjwww.yunmarket.transaction.model.OrderedItemsForm;
+import com.yjjjwww.yunmarket.transaction.model.TransactionsForm;
 import com.yjjjwww.yunmarket.transaction.repository.OrderedRepository;
 import com.yjjjwww.yunmarket.transaction.repository.TransactionRepository;
 import java.time.LocalDateTime;
@@ -83,6 +85,43 @@ public class OrderServiceImpl implements OrderService {
     transactionRepository.save(transaction);
     orderedRepository.saveAll(orderedList);
     cartRepository.deleteByCustomerId(customer.getId());
+  }
+
+  @Override
+  public List<OrderedItemsForm> getTotalOrderedItems(String token) {
+    Customer customer = getCustomerFromToken(token);
+    List<Ordered> orderedList = orderedRepository.findByCustomerId(customer.getId());
+
+    if (orderedList.size() == 0) {
+      throw new CustomException(ErrorCode.ORDERED_NOT_FOUND);
+    }
+
+    return OrderedItemsForm.of(orderedList);
+  }
+
+  @Override
+  public List<TransactionsForm> getTotalTransactions(String token) {
+    Customer customer = getCustomerFromToken(token);
+    List<Transaction> transactionList = transactionRepository.findByCustomerId(customer.getId());
+
+    if (transactionList.size() == 0) {
+      throw new CustomException(ErrorCode.TRANSACTION_NOT_FOUND);
+    }
+
+    return TransactionsForm.of(transactionList);
+  }
+
+  @Override
+  public List<OrderedItemsForm> getOrderedItemsByTransaction(String token, Long transactionId) {
+    Customer customer = getCustomerFromToken(token);
+    List<Ordered> orderedList = orderedRepository.findByCustomerIdAndTransactionId(customer.getId(),
+        transactionId);
+
+    if (orderedList.size() == 0) {
+      throw new CustomException(ErrorCode.ORDERED_NOT_FOUND);
+    }
+
+    return OrderedItemsForm.of(orderedList);
   }
 
   private Customer getCustomerFromToken(String token) {

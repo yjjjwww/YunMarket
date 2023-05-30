@@ -18,9 +18,13 @@ import com.yjjjwww.yunmarket.exception.CustomException;
 import com.yjjjwww.yunmarket.exception.ErrorCode;
 import com.yjjjwww.yunmarket.product.entity.Product;
 import com.yjjjwww.yunmarket.seller.entity.Seller;
+import com.yjjjwww.yunmarket.transaction.entity.Ordered;
 import com.yjjjwww.yunmarket.transaction.entity.Transaction;
+import com.yjjjwww.yunmarket.transaction.model.OrderedItemsForm;
+import com.yjjjwww.yunmarket.transaction.model.TransactionsForm;
 import com.yjjjwww.yunmarket.transaction.repository.OrderedRepository;
 import com.yjjjwww.yunmarket.transaction.repository.TransactionRepository;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -116,5 +120,193 @@ class OrderServiceImplTest {
 
     //then
     assertEquals(ErrorCode.CART_NOT_FOUND, exception.getErrorCode());
+  }
+
+  @Test
+  void getTotalOrderedItemsSuccess() {
+    //given
+    given(provider.getUserVo(anyString()))
+        .willReturn(new UserVo(1L, "yjjjwww@naver.com"));
+
+    given(customerRepository.findById(anyLong()))
+        .willReturn(Optional.ofNullable(Customer.builder()
+            .id(1L)
+            .build()));
+
+    List<Ordered> orderedList = new ArrayList<>();
+    for (int i = 0; i < 3; i++) {
+      Product product = Product.builder()
+          .name("상품" + i)
+          .image("이미지")
+          .build();
+      Transaction transaction = Transaction.builder()
+          .id((long) i)
+          .transactionDate(LocalDateTime.now())
+          .deletedYn(false)
+          .build();
+      Ordered ordered = Ordered.builder()
+          .price(i + 1000)
+          .quantity(i + 1)
+          .product(product)
+          .transaction(transaction)
+          .build();
+      orderedList.add(ordered);
+    }
+
+    given(orderedRepository.findByCustomerId(anyLong()))
+        .willReturn(orderedList);
+
+    //when
+    List<OrderedItemsForm> result = orderService.getTotalOrderedItems("token");
+
+    //then
+    assertEquals(3, result.size());
+  }
+
+  @Test
+  void getTotalOrderedItemsFail_ORDERED_NOT_FOUND() {
+    //given
+    given(provider.getUserVo(anyString()))
+        .willReturn(new UserVo(1L, "yjjjwww@naver.com"));
+
+    given(customerRepository.findById(anyLong()))
+        .willReturn(Optional.ofNullable(Customer.builder()
+            .id(1L)
+            .build()));
+
+    List<Ordered> orderedList = new ArrayList<>();
+
+    given(orderedRepository.findByCustomerId(anyLong()))
+        .willReturn(orderedList);
+
+    //when
+    CustomException exception = assertThrows(CustomException.class,
+        () -> orderService.getTotalOrderedItems("token"));
+
+    //then
+    assertEquals(ErrorCode.ORDERED_NOT_FOUND, exception.getErrorCode());
+  }
+
+  @Test
+  void getTotalTransactionsSuccess() {
+    //given
+    given(provider.getUserVo(anyString()))
+        .willReturn(new UserVo(1L, "yjjjwww@naver.com"));
+
+    given(customerRepository.findById(anyLong()))
+        .willReturn(Optional.ofNullable(Customer.builder()
+            .id(1L)
+            .build()));
+
+    List<Transaction> transactionList = new ArrayList<>();
+    for (int i = 0; i < 3; i++) {
+      Transaction transaction = Transaction.builder()
+          .id((long) i)
+          .transactionPrice(i + 1)
+          .pointUse(i)
+          .transactionDate(LocalDateTime.now())
+          .deletedYn(false)
+          .build();
+
+      transactionList.add(transaction);
+    }
+
+    given(transactionRepository.findByCustomerId(anyLong()))
+        .willReturn(transactionList);
+
+    //when
+    List<TransactionsForm> result = orderService.getTotalTransactions("token");
+
+    //then
+    assertEquals(3, result.size());
+  }
+
+  @Test
+  void getTotalTransactionsFail_TRANSACTION_NOT_FOUND() {
+    //given
+    given(provider.getUserVo(anyString()))
+        .willReturn(new UserVo(1L, "yjjjwww@naver.com"));
+
+    given(customerRepository.findById(anyLong()))
+        .willReturn(Optional.ofNullable(Customer.builder()
+            .id(1L)
+            .build()));
+
+    List<Transaction> transactionList = new ArrayList<>();
+
+    given(transactionRepository.findByCustomerId(anyLong()))
+        .willReturn(transactionList);
+
+    //when
+    CustomException exception = assertThrows(CustomException.class,
+        () -> orderService.getTotalTransactions("token"));
+
+    //then
+    assertEquals(ErrorCode.TRANSACTION_NOT_FOUND, exception.getErrorCode());
+  }
+
+  @Test
+  void getOrderedItemsByTransactionSuccess() {
+    //given
+    given(provider.getUserVo(anyString()))
+        .willReturn(new UserVo(1L, "yjjjwww@naver.com"));
+
+    given(customerRepository.findById(anyLong()))
+        .willReturn(Optional.ofNullable(Customer.builder()
+            .id(1L)
+            .build()));
+
+    List<Ordered> orderedList = new ArrayList<>();
+    for (int i = 0; i < 3; i++) {
+      Product product = Product.builder()
+          .name("상품" + i)
+          .image("이미지")
+          .build();
+      Transaction transaction = Transaction.builder()
+          .id((long) i)
+          .transactionDate(LocalDateTime.now())
+          .deletedYn(false)
+          .build();
+      Ordered ordered = Ordered.builder()
+          .price(i + 1000)
+          .quantity(i + 1)
+          .product(product)
+          .transaction(transaction)
+          .build();
+      orderedList.add(ordered);
+    }
+
+    given(orderedRepository.findByCustomerIdAndTransactionId(anyLong(), anyLong()))
+        .willReturn(orderedList);
+
+    //when
+    List<OrderedItemsForm> result = orderService.getOrderedItemsByTransaction("token", 1L);
+
+    //then
+    assertEquals(3, result.size());
+  }
+
+  @Test
+  void getOrderedItemsByTransactionFail_ORDERED_NOT_FOUND() {
+    //given
+    given(provider.getUserVo(anyString()))
+        .willReturn(new UserVo(1L, "yjjjwww@naver.com"));
+
+    given(customerRepository.findById(anyLong()))
+        .willReturn(Optional.ofNullable(Customer.builder()
+            .id(1L)
+            .build()));
+
+    List<Ordered> orderedList = new ArrayList<>();
+
+    given(orderedRepository.findByCustomerIdAndTransactionId(anyLong(), anyLong()))
+        .willReturn(orderedList);
+
+    //when
+    CustomException exception = assertThrows(CustomException.class,
+        () -> orderService.getOrderedItemsByTransaction("token", 1L));
+
+    //then
+    assertEquals(ErrorCode.ORDERED_NOT_FOUND, exception.getErrorCode());
   }
 }
