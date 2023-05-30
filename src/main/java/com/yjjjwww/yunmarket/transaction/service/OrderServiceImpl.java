@@ -54,6 +54,7 @@ public class OrderServiceImpl implements OrderService {
 
     for (Cart cart : cartList) {
       Product product = cart.getProduct();
+      product.setOrderedCnt(product.getOrderedCnt() + 1); 
       Seller seller = cart.getProduct().getSeller();
       int totalPrice = product.getPrice() * cart.getQuantity();
 

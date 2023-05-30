@@ -37,11 +37,11 @@ public class Product extends BaseEntity {
   @ToString.Exclude
   private Seller seller;
 
-  String name;
-  Integer price;
-  String description;
-  Integer quantity;
-  String image;
-  Integer orderedCnt;
-  boolean deletedYn;
+  private String name;
+  private Integer price;
+  private String description;
+  private Integer quantity;
+  private String image;
+  private Integer orderedCnt;
+  private boolean deletedYn;
 }

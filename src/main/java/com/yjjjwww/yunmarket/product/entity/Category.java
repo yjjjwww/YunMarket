@@ -30,7 +30,7 @@ public class Category {
 
   @Column(unique = true)
   @Field(type = FieldType.Text)
-  String name;
+  private String name;
 
   @OneToMany(mappedBy = "category", fetch = FetchType.EAGER)
   @ToString.Exclude
