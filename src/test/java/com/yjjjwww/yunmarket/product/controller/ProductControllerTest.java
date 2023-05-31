@@ -317,7 +317,7 @@ class ProductControllerTest {
         .build();
 
     //when
-    given(productService.getProductInfo(anyLong())).willReturn(product);
+    given(productService.getProductInfo(anyLong(), any())).willReturn(product);
 
     //then
     mockMvc.perform(get("/product/info/1"))
@@ -331,10 +331,55 @@ class ProductControllerTest {
     //when
     doThrow(new CustomException(ErrorCode.PRODUCT_NOT_FOUND))
         .when(productService)
-        .getProductInfo(anyLong());
+        .getProductInfo(anyLong(), anyString());
     //when
     //then
     ResultActions result = mockMvc.perform(get("/product/info/1"));
+    result.andExpect(status().isBadRequest())
+        .andDo(print());
+    String responseBody = result.andReturn().getResponse().getContentAsString();
+    JsonNode responseJson = objectMapper.readTree(responseBody);
+    String code = responseJson.get("code").asText();
+
+    assertEquals("PRODUCT_NOT_FOUND", code);
+  }
+
+  @Test
+  void getRecentViewedProductsSuccess() throws Exception {
+    //given
+    List<ProductInfo> productInfoList = new ArrayList<>();
+
+    for (int i = 0; i < 3; i++) {
+      ProductInfo product = ProductInfo.builder()
+          .id((long) i)
+          .name("상품 이름" + i)
+          .price(1000 + i)
+          .description("상품" + i + " 설명")
+          .quantity(30 + i)
+          .image("이미지 주소")
+          .categoryName("상품 카테고리")
+          .build();
+
+      productInfoList.add(product);
+    }
+
+    //when
+    given(productService.getRecentViewedProducts(anyString(), anyInt(), anyInt())).willReturn(productInfoList);
+
+    //then
+    mockMvc.perform(get("/product/recent?page=1&size=5"))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void getRecentViewedProductsFail_PRODUCT_NOT_FOUND() throws Exception {
+    //given
+    doThrow(new CustomException(ErrorCode.PRODUCT_NOT_FOUND))
+        .when(productService)
+        .getRecentViewedProducts(anyString(), anyInt(), anyInt());
+    //when
+    //then
+    ResultActions result = mockMvc.perform(get("/product/recent?page=1&size=5"));
     result.andExpect(status().isBadRequest())
         .andDo(print());
     String responseBody = result.andReturn().getResponse().getContentAsString();

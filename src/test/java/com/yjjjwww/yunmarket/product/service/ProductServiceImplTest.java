@@ -16,11 +16,13 @@ import com.yjjjwww.yunmarket.exception.ErrorCode;
 import com.yjjjwww.yunmarket.product.entity.Category;
 import com.yjjjwww.yunmarket.product.entity.Product;
 import com.yjjjwww.yunmarket.product.entity.ProductDocument;
+import com.yjjjwww.yunmarket.product.entity.ProductViewHistory;
 import com.yjjjwww.yunmarket.product.model.ProductInfo;
 import com.yjjjwww.yunmarket.product.model.ProductRegisterServiceForm;
 import com.yjjjwww.yunmarket.product.repository.CategoryRepository;
 import com.yjjjwww.yunmarket.product.repository.ElasticSearchProductRepository;
 import com.yjjjwww.yunmarket.product.repository.ProductRepository;
+import com.yjjjwww.yunmarket.product.repository.ProductViewHistoryRepository;
 import com.yjjjwww.yunmarket.seller.entity.Seller;
 import com.yjjjwww.yunmarket.seller.repository.SellerRepository;
 import java.util.ArrayList;
@@ -51,6 +53,9 @@ class ProductServiceImplTest {
 
   @Mock
   private CategoryRepository categoryRepository;
+
+  @Mock
+  private ProductViewHistoryRepository productViewHistoryRepository;
 
   @Mock
   private JwtTokenProvider provider;
@@ -295,10 +300,14 @@ class ProductServiceImplTest {
             .build())
         .build();
 
-    given(productRepository.findById(anyLong())).willReturn(Optional.ofNullable(product));
+    given(productRepository.findById(anyLong()))
+        .willReturn(Optional.ofNullable(product));
+
+    given(productViewHistoryRepository.findByUserIp(anyString()))
+        .willReturn(Optional.ofNullable(ProductViewHistory.builder().build()));
 
     //when
-    ProductInfo result = productService.getProductInfo(1L);
+    ProductInfo result = productService.getProductInfo(1L, "ip");
 
     //then
     assertEquals("상품 이름", result.getName());
@@ -311,7 +320,7 @@ class ProductServiceImplTest {
     //given
     //when
     CustomException exception = assertThrows(CustomException.class,
-        () -> productService.getProductInfo(1L));
+        () -> productService.getProductInfo(1L, anyString()));
 
     //then
     assertEquals(ErrorCode.PRODUCT_NOT_FOUND, exception.getErrorCode());

@@ -11,7 +11,6 @@ import com.yjjjwww.yunmarket.exception.ErrorCode;
 import com.yjjjwww.yunmarket.product.entity.Product;
 import com.yjjjwww.yunmarket.product.repository.ProductRepository;
 import com.yjjjwww.yunmarket.seller.entity.Seller;
-import com.yjjjwww.yunmarket.seller.repository.SellerRepository;
 import com.yjjjwww.yunmarket.transaction.entity.Ordered;
 import com.yjjjwww.yunmarket.transaction.entity.Transaction;
 import com.yjjjwww.yunmarket.transaction.model.OrderedItemsForm;
@@ -30,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class OrderServiceImpl implements OrderService {
 
   private final JwtTokenProvider provider;
-  private final SellerRepository sellerRepository;
   private final CustomerRepository customerRepository;
   private final CartRepository cartRepository;
   private final ProductRepository productRepository;
@@ -53,12 +51,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     List<Ordered> orderedList = new ArrayList<>();
+    List<Product> productList = new ArrayList<>();
 
     int total = 0;
 
     for (Cart cart : cartList) {
       Product product = cart.getProduct();
-      product.setOrderedCnt(product.getOrderedCnt() + 1); 
+      product.setOrderedCnt(product.getOrderedCnt() + 1);
+      product.setQuantity(product.getQuantity() - cart.getQuantity());
       Seller seller = cart.getProduct().getSeller();
       int totalPrice = product.getPrice() * cart.getQuantity();
 
@@ -72,6 +72,7 @@ public class OrderServiceImpl implements OrderService {
           .build();
 
       orderedList.add(ordered);
+      productList.add(product);
       total += totalPrice;
     }
 
@@ -89,6 +90,7 @@ public class OrderServiceImpl implements OrderService {
 
     customer.setPoint(customer.getPoint() - point + total / 100);
 
+    productRepository.saveAll(productList);
     customerRepository.save(customer);
     transactionRepository.save(transaction);
     orderedRepository.saveAll(orderedList);

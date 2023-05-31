@@ -1,9 +1,11 @@
 package com.yjjjwww.yunmarket.product.controller;
 
+import com.yjjjwww.yunmarket.common.ClientUtils;
 import com.yjjjwww.yunmarket.product.model.ProductInfo;
 import com.yjjjwww.yunmarket.product.model.ProductRegisterForm;
 import com.yjjjwww.yunmarket.product.service.ProductService;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -52,8 +54,20 @@ public class ProductController {
 
   @GetMapping("/info/{id}")
   public ResponseEntity<ProductInfo> getProductInfo(
-      @PathVariable long id
+      @PathVariable long id,
+      HttpServletRequest request
   ) {
-    return ResponseEntity.ok(productService.getProductInfo(id));
+    String userIp = ClientUtils.getIp(request);
+    return ResponseEntity.ok(productService.getProductInfo(id, userIp));
+  }
+
+  @GetMapping("/recent")
+  public ResponseEntity<List<ProductInfo>> getRecentViewedProducts(
+      HttpServletRequest request,
+      @RequestParam("page") Integer page,
+      @RequestParam("size") Integer size
+  ) {
+    String userIp = ClientUtils.getIp(request);
+    return ResponseEntity.ok(productService.getRecentViewedProducts(userIp, page, size));
   }
 }
