@@ -7,18 +7,22 @@ import com.yjjjwww.yunmarket.exception.ErrorCode;
 import com.yjjjwww.yunmarket.product.entity.Category;
 import com.yjjjwww.yunmarket.product.entity.Product;
 import com.yjjjwww.yunmarket.product.entity.ProductDocument;
+import com.yjjjwww.yunmarket.product.entity.ProductViewHistory;
 import com.yjjjwww.yunmarket.product.model.ProductInfo;
 import com.yjjjwww.yunmarket.product.model.ProductRegisterServiceForm;
 import com.yjjjwww.yunmarket.product.repository.CategoryRepository;
 import com.yjjjwww.yunmarket.product.repository.ElasticSearchProductRepository;
 import com.yjjjwww.yunmarket.product.repository.ProductRepository;
+import com.yjjjwww.yunmarket.product.repository.ProductViewHistoryRepository;
 import com.yjjjwww.yunmarket.seller.entity.Seller;
 import com.yjjjwww.yunmarket.seller.repository.SellerRepository;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -30,6 +34,7 @@ public class ProductServiceImpl implements ProductService {
   private final ProductRepository productRepository;
   private final ElasticSearchProductRepository elasticSearchProductRepository;
   private final CategoryRepository categoryRepository;
+  private final ProductViewHistoryRepository productViewHistoryRepository;
 
   @Override
   public void register(String token, ProductRegisterServiceForm form) {
@@ -79,11 +84,51 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public ProductInfo getProductInfo(Long id) {
+  public ProductInfo getProductInfo(Long id, String userIp) {
     Product product = productRepository.findById(id)
         .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
+    Optional<ProductViewHistory> optionalProductViewHistory = productViewHistoryRepository.findByUserIp(
+        userIp);
+
+    ProductViewHistory productViewHistory;
+
+    if (optionalProductViewHistory.isPresent()) {
+      productViewHistory = optionalProductViewHistory.get();
+      productViewHistory.setProduct(product);
+    } else {
+      productViewHistory = ProductViewHistory.builder()
+          .product(product)
+          .userIp(userIp)
+          .build();
+
+    }
+    productViewHistoryRepository.save(productViewHistory);
+
     return ProductInfo.from(product);
+  }
+
+  @Override
+  public List<ProductInfo> getRecentViewedProducts(String userIp) {
+    Optional<ProductViewHistory> optionalProductViewHistory = productViewHistoryRepository.findByUserIp(
+        userIp);
+
+    if (optionalProductViewHistory.isEmpty()) {
+      throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
+    }
+
+    Product product = optionalProductViewHistory.get().getProduct();
+    Long categoryId = product.getCategory().getId();
+
+    Pageable pageable = PageRequest.of(0, 4, Sort.by("orderedCnt").descending());
+
+    Page<Product> productList = productRepository.findAllByCategoryId(categoryId, pageable);
+
+    List<ProductInfo> productInfoList = ProductInfo.toList(productList);
+
+    productInfoList.add(0, ProductInfo.from(product));
+
+    return productInfoList;
   }
 
   private static boolean isStringEmpty(String str) {

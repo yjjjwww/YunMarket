@@ -25,5 +25,10 @@ public interface ProductService {
   /**
    * 상품 상세 정보 불러오기
    */
-  ProductInfo getProductInfo(Long id);
+  ProductInfo getProductInfo(Long id, String userIp);
+
+  /**
+   * IP 기준 최근 본 상품과 관련 인기 상품들 가져오기
+   */
+  List<ProductInfo> getRecentViewedProducts(String userIp);
 }
