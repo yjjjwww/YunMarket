@@ -63,9 +63,11 @@ public class ProductController {
 
   @GetMapping("/recent")
   public ResponseEntity<List<ProductInfo>> getRecentViewedProducts(
-      HttpServletRequest request
+      HttpServletRequest request,
+      @RequestParam("page") Integer page,
+      @RequestParam("size") Integer size
   ) {
     String userIp = ClientUtils.getIp(request);
-    return ResponseEntity.ok(productService.getRecentViewedProducts(userIp));
+    return ResponseEntity.ok(productService.getRecentViewedProducts(userIp, page, size));
   }
 }

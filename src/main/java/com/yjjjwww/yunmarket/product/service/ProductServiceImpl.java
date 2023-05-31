@@ -109,7 +109,7 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public List<ProductInfo> getRecentViewedProducts(String userIp) {
+  public List<ProductInfo> getRecentViewedProducts(String userIp, Integer page, Integer size) {
     Optional<ProductViewHistory> optionalProductViewHistory = productViewHistoryRepository.findByUserIp(
         userIp);
 
@@ -120,7 +120,7 @@ public class ProductServiceImpl implements ProductService {
     Product product = optionalProductViewHistory.get().getProduct();
     Long categoryId = product.getCategory().getId();
 
-    Pageable pageable = PageRequest.of(0, 4, Sort.by("orderedCnt").descending());
+    Pageable pageable = PageRequest.of(page - 1, size, Sort.by("orderedCnt").descending());
 
     Page<Product> productList = productRepository.findAllByCategoryId(categoryId, pageable);
 
