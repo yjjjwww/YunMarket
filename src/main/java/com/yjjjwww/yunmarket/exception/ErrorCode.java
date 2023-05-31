@@ -14,6 +14,7 @@ public enum ErrorCode {
   REVIEW_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "해당 주문의 리뷰가 이미 존재합니다."),
   REVIEW_NOT_FOUND(HttpStatus.BAD_REQUEST, "리뷰를 찾을 수 없습니다."),
   PRODUCT_NOT_FOUND(HttpStatus.BAD_REQUEST, "상품을 찾을 수 없습니다."),
+  QUESTION_NOT_FOUND(HttpStatus.BAD_REQUEST, "문의를 찾을 수 없습니다."),
   CART_NOT_FOUND(HttpStatus.BAD_REQUEST, "장바구니를 찾을 수 없습니다."),
   ORDERED_NOT_FOUND(HttpStatus.BAD_REQUEST, "주문 정보를 찾을 수 없습니다."),
   TRANSACTION_NOT_FOUND(HttpStatus.BAD_REQUEST, "주문 정보를 찾을 수 없습니다."),
