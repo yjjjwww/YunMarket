@@ -1,6 +1,7 @@
 package com.yjjjwww.yunmarket.transaction.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -49,7 +50,7 @@ class OrderControllerTest {
 
     //when
     //then
-    mockMvc.perform(post("/order")
+    mockMvc.perform(post("/order?point=300")
             .header("Authorization", "Bearer " + token))
         .andExpect(status().isOk())
         .andDo(print());
@@ -63,7 +64,7 @@ class OrderControllerTest {
 
     //when
     //then
-    mockMvc.perform(post("/order")
+    mockMvc.perform(post("/order?point=300")
             .header("Authorization", "Bearer " + token))
         .andExpect(status().isForbidden())
         .andDo(print());
@@ -77,10 +78,10 @@ class OrderControllerTest {
 
     doThrow(new CustomException(ErrorCode.CART_NOT_FOUND))
         .when(orderService)
-        .orderItems(anyString());
+        .orderItems(anyString(), anyInt());
     //when
     //then
-    ResultActions result = mockMvc.perform(post("/order")
+    ResultActions result = mockMvc.perform(post("/order?point=100")
         .header("Authorization", "Bearer " + token));
     result.andExpect(status().isBadRequest())
         .andDo(print());
