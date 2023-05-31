@@ -17,6 +17,7 @@ import com.yjjjwww.yunmarket.customer.repository.CustomerRepository;
 import com.yjjjwww.yunmarket.exception.CustomException;
 import com.yjjjwww.yunmarket.exception.ErrorCode;
 import com.yjjjwww.yunmarket.product.entity.Product;
+import com.yjjjwww.yunmarket.product.repository.ProductRepository;
 import com.yjjjwww.yunmarket.seller.entity.Seller;
 import com.yjjjwww.yunmarket.transaction.entity.Ordered;
 import com.yjjjwww.yunmarket.transaction.entity.Transaction;
@@ -52,6 +53,9 @@ class OrderServiceImplTest {
   @Mock
   private TransactionRepository transactionRepository;
 
+  @Mock
+  private ProductRepository productRepository;
+
   @InjectMocks
   private OrderServiceImpl orderService;
 
@@ -78,6 +82,7 @@ class OrderServiceImplTest {
           .seller(seller)
           .price(1000 + i)
           .orderedCnt(0)
+          .quantity(100)
           .build();
 
       Cart cart = Cart.builder()

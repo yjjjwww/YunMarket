@@ -364,10 +364,10 @@ class ProductControllerTest {
     }
 
     //when
-    given(productService.getRecentViewedProducts(anyString())).willReturn(productInfoList);
+    given(productService.getRecentViewedProducts(anyString(), anyInt(), anyInt())).willReturn(productInfoList);
 
     //then
-    mockMvc.perform(get("/product/recent"))
+    mockMvc.perform(get("/product/recent?page=1&size=5"))
         .andExpect(status().isOk());
   }
 
@@ -376,10 +376,10 @@ class ProductControllerTest {
     //given
     doThrow(new CustomException(ErrorCode.PRODUCT_NOT_FOUND))
         .when(productService)
-        .getRecentViewedProducts(anyString());
+        .getRecentViewedProducts(anyString(), anyInt(), anyInt());
     //when
     //then
-    ResultActions result = mockMvc.perform(get("/product/recent"));
+    ResultActions result = mockMvc.perform(get("/product/recent?page=1&size=5"));
     result.andExpect(status().isBadRequest())
         .andDo(print());
     String responseBody = result.andReturn().getResponse().getContentAsString();

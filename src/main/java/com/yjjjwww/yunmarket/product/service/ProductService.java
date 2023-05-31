@@ -30,5 +30,5 @@ public interface ProductService {
   /**
    * IP 기준 최근 본 상품과 관련 인기 상품들 가져오기
    */
-  List<ProductInfo> getRecentViewedProducts(String userIp);
+  List<ProductInfo> getRecentViewedProducts(String userIp, Integer page, Integer size);
 }
