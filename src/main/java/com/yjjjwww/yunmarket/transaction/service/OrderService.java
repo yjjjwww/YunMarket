@@ -9,7 +9,7 @@ public interface OrderService {
   /**
    * 상품 주문하기
    */
-  void orderItems(String token);
+  void orderItems(String token, Integer point);
 
   /**
    * 주문 상품 전체 목록 가져오기

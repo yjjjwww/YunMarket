@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -26,9 +27,10 @@ public class OrderController {
   @PostMapping
   @PreAuthorize("hasRole('CUSTOMER')")
   public ResponseEntity<String> orderItems(
-      @RequestHeader(name = HttpHeaders.AUTHORIZATION) String token
+      @RequestHeader(name = HttpHeaders.AUTHORIZATION) String token,
+      @RequestParam("point") Integer point
   ) {
-    orderService.orderItems(token);
+    orderService.orderItems(token, point);
     return ResponseEntity.ok(ORDER_ITEMS_SUCCESS);
   }
 
