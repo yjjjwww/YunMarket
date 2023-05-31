@@ -76,6 +76,7 @@ class OrderServiceImplTest {
           .id((long) i)
           .seller(seller)
           .price(1000 + i)
+          .orderedCnt(0)
           .build();
 
       Cart cart = Cart.builder()
