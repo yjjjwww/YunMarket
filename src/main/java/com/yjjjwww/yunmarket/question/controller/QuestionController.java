@@ -36,7 +36,7 @@ public class QuestionController {
     return ResponseEntity.ok(REGISTER_QUESTION_SUCCESS);
   }
 
-  @PostMapping
+  @PostMapping("/answer")
   @PreAuthorize("hasRole('SELLER')")
   public ResponseEntity<String> registerAnswer(
       @RequestHeader(name = HttpHeaders.AUTHORIZATION) String token,
