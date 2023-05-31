@@ -64,6 +64,7 @@ class OrderServiceImplTest {
     given(customerRepository.findById(anyLong()))
         .willReturn(Optional.ofNullable(Customer.builder()
             .id(1L)
+            .point(1000)
             .build()));
 
     List<Cart> cartList = new ArrayList<>();
@@ -91,7 +92,7 @@ class OrderServiceImplTest {
         .willReturn(cartList);
 
     //when
-    orderService.orderItems("jwt");
+    orderService.orderItems("jwt", 300);
 
     //then
     verify(transactionRepository, times(1)).save(any(Transaction.class));
@@ -117,7 +118,7 @@ class OrderServiceImplTest {
 
     //when
     CustomException exception = assertThrows(CustomException.class,
-        () -> orderService.orderItems("token"));
+        () -> orderService.orderItems("token", 300));
 
     //then
     assertEquals(ErrorCode.CART_NOT_FOUND, exception.getErrorCode());

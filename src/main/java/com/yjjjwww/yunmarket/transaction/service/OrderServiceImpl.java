@@ -39,8 +39,12 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   @Transactional
-  public void orderItems(String token) {
+  public void orderItems(String token, Integer point) {
     Customer customer = getCustomerFromToken(token);
+
+    if (customer.getPoint() < point) {
+      throw new CustomException(ErrorCode.NOT_ENOUGH_POINT);
+    }
 
     List<Cart> cartList = cartRepository.findByCustomerId(customer.getId());
 
@@ -75,14 +79,17 @@ public class OrderServiceImpl implements OrderService {
         .customer(customer)
         .orderedListList(orderedList)
         .transactionDate(LocalDateTime.now())
-        .transactionPrice(total)
-        .pointUse(0)
+        .transactionPrice(total - point)
+        .pointUse(point)
         .build();
 
     for (Ordered ordered : orderedList) {
       ordered.setTransaction(transaction);
     }
 
+    customer.setPoint(customer.getPoint() - point + total / 100);
+
+    customerRepository.save(customer);
     transactionRepository.save(transaction);
     orderedRepository.saveAll(orderedList);
     cartRepository.deleteByCustomerId(customer.getId());

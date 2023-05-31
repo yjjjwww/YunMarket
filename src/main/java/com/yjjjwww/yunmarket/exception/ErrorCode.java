@@ -18,6 +18,7 @@ public enum ErrorCode {
   ORDERED_NOT_FOUND(HttpStatus.BAD_REQUEST, "주문 정보를 찾을 수 없습니다."),
   TRANSACTION_NOT_FOUND(HttpStatus.BAD_REQUEST, "주문 정보를 찾을 수 없습니다."),
   NOT_ENOUGH_QUANTITY(HttpStatus.BAD_REQUEST, "수량이 부족합니다."),
+  NOT_ENOUGH_POINT(HttpStatus.BAD_REQUEST, "적립금이 부족합니다."),
   CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "카테고리를 찾을 수 없습니다."),
   LOGIN_CHECK_FAIL(HttpStatus.BAD_REQUEST, "아이디나 패스워드를 확인해 주세요."),
   INVALID_REVIEW_FORM(HttpStatus.BAD_REQUEST, "리뷰 양식을 확인해주세요."),
