@@ -109,6 +109,7 @@ class OrderServiceImplTest {
     given(customerRepository.findById(anyLong()))
         .willReturn(Optional.ofNullable(Customer.builder()
             .id(1L)
+            .point(300)
             .build()));
 
     List<Cart> cartList = new ArrayList<>();
