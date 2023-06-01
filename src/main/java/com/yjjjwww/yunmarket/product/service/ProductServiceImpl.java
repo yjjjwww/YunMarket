@@ -19,6 +19,8 @@ import com.yjjjwww.yunmarket.seller.repository.SellerRepository;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +39,7 @@ public class ProductServiceImpl implements ProductService {
   private final ProductViewHistoryRepository productViewHistoryRepository;
 
   @Override
+  @CacheEvict(value = "product", allEntries = true)
   public void register(String token, ProductRegisterServiceForm form) {
     if (isStringEmpty(form.getName()) || form.getPrice() <= 0 || isStringEmpty(
         form.getDescription()) || form.getQuantity() <= 0) {
@@ -68,6 +71,7 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
+  @Cacheable(key = "#pageable", value = "product")
   public List<ProductInfo> getProducts(Pageable pageable) {
     Page<Product> products = productRepository.findAll(pageable);
 
@@ -84,6 +88,7 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
+  @Cacheable(key = "#id", value = "productInfo")
   public ProductInfo getProductInfo(Long id, String userIp) {
     Product product = productRepository.findById(id)
         .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));

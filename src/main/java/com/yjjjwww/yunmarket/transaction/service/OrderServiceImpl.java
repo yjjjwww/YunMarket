@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +38,7 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   @Transactional
+  @CacheEvict(value = "productInfo", allEntries = true)
   public void orderItems(String token, Integer point) {
     Customer customer = getCustomerFromToken(token);
 
