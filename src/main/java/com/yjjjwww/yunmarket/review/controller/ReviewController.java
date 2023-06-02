@@ -4,6 +4,8 @@ import com.yjjjwww.yunmarket.review.model.ReviewCommentRegisterForm;
 import com.yjjjwww.yunmarket.review.model.ReviewDto;
 import com.yjjjwww.yunmarket.review.model.ReviewRegisterForm;
 import com.yjjjwww.yunmarket.review.service.ReviewService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -27,6 +29,7 @@ public class ReviewController {
   private static final String REGISTER_REVIEW_SUCCESS = "리뷰 등록 완료";
   private static final String REGISTER_REVIEW_COMMENT_SUCCESS = "리뷰 댓글 등록 완료";
 
+  @ApiOperation(value = "Customer 리뷰 등록")
   @PostMapping
   @PreAuthorize("hasRole('CUSTOMER')")
   public ResponseEntity<String> registerReview(
@@ -36,15 +39,20 @@ public class ReviewController {
     return ResponseEntity.ok(REGISTER_REVIEW_SUCCESS);
   }
 
+  @ApiOperation(value = "리뷰 페이지 가져오기")
   @GetMapping
   public ResponseEntity<List<ReviewDto>> getReviews(
+      @Parameter(name = "productId", description = "상품 아이디")
       @RequestParam("productId") Long productId,
+      @Parameter(name = "page", description = "페이지")
       @RequestParam("page") Integer page,
+      @Parameter(name = "size", description = "페이지 크기")
       @RequestParam("size") Integer size
   ) {
     return ResponseEntity.ok(reviewService.getReviews(productId, page, size));
   }
 
+  @ApiOperation(value = "리뷰 답변 등록")
   @PostMapping("/comment")
   @PreAuthorize("hasRole('SELLER')")
   public ResponseEntity<String> registerReviewComment(

@@ -2,6 +2,7 @@ package com.yjjjwww.yunmarket.transaction.controller;
 
 import com.yjjjwww.yunmarket.transaction.model.TransactionsForm;
 import com.yjjjwww.yunmarket.transaction.service.OrderService;
+import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +20,7 @@ public class TransactionController {
 
   private final OrderService orderService;
 
+  @ApiOperation(value = "Customer 주문 정보 조회")
   @GetMapping
   @PreAuthorize("hasRole('CUSTOMER')")
   public ResponseEntity<List<TransactionsForm>> getTotalTransactions(
