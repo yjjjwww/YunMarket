@@ -3,6 +3,8 @@ package com.yjjjwww.yunmarket.cart.controller;
 import com.yjjjwww.yunmarket.cart.model.AddCartForm;
 import com.yjjjwww.yunmarket.cart.model.EditCartForm;
 import com.yjjjwww.yunmarket.cart.service.CartService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -28,9 +30,10 @@ public class CartController {
   private static final String DELETE_CART_ITEM_SUCCESS = "장바구니 상품 삭제 완료";
   private static final String DELETE_ALL_CART_SUCCESS = "삭제 완료";
 
+  @ApiOperation(value = "장바구니 추가")
   @PostMapping
   @PreAuthorize("hasRole('CUSTOMER')")
-  public ResponseEntity<String> registerProduct(
+  public ResponseEntity<String> addCart(
       @RequestHeader(name = HttpHeaders.AUTHORIZATION) String token,
       @RequestBody AddCartForm form
   ) {
@@ -38,6 +41,7 @@ public class CartController {
     return ResponseEntity.ok(ADD_CART_SUCCESS);
   }
 
+  @ApiOperation(value = "장바구니 수정")
   @PutMapping
   @PreAuthorize("hasRole('CUSTOMER')")
   public ResponseEntity<String> editCart(
@@ -48,16 +52,19 @@ public class CartController {
     return ResponseEntity.ok(EDIT_CART_SUCCESS);
   }
 
+  @ApiOperation(value = "하나의 상품을 장바구니에서 제거")
   @DeleteMapping("/item/{id}")
   @PreAuthorize("hasRole('CUSTOMER')")
   public ResponseEntity<String> deleteCartItem(
       @RequestHeader(name = HttpHeaders.AUTHORIZATION) String token,
+      @Parameter(name = "id", description = "장바구니 아이디")
       @PathVariable("id") long id
   ) {
     cartService.deleteCartItem(token, id);
     return ResponseEntity.ok(DELETE_CART_ITEM_SUCCESS);
   }
 
+  @ApiOperation(value = "장바구니 전체 삭제")
   @DeleteMapping("/items")
   @PreAuthorize("hasRole('CUSTOMER')")
   public ResponseEntity<String> deleteAllCart(
